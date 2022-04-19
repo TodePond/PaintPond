@@ -36,16 +36,22 @@ const makePainter = ({
 		minSpeed,
 		acceleration,
 		isPainting: false,
+		r: 0,
+		dr: 0,
 	}
 	return painter
 }
 
 const drawPainter = (context, painter) => {
-	const {scale, image} = painter
+	const {image, scale, r} = painter
 	const x = painter.x + painter.offsetX * scale
 	const y = painter.y + painter.offsetY * scale
 	const [width, height] = ["width", "height"].map(dimension => image[dimension] * scale)
-	context.drawImage(image, x, y, width, height)
+	context.translate(x, y)
+	context.rotate(r)
+	context.drawImage(image, 0, 0, width, height)
+	context.rotate(-r)
+	context.translate(-x, -y)
 }
 
 const updatePainter = (painter, paths) => {
@@ -84,6 +90,8 @@ const updatePainter = (painter, paths) => {
 		path.quadraticCurveTo(previous.x + control.x, previous.y + control.y, painter.x, painter.y)
 		//path.lineTo(painter.x, painter.y)
 	}
+
+	painter.r = painter.dx * 0.01 + painter.dy * -0.01
 
 }
 
