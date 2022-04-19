@@ -3,6 +3,6 @@ paint with a painter. This is something I'm making for my next video at [youtube
 
 Try it [here](https://iridescent-phoenix-827721.netlify.app/)!
 
-Move the mouse to move the painter.
-Left-click to paint.
-Right-click to slow down.
+Move the mouse to move the painter.<br>
+Left-click to paint.<br>
+Right-click to slow down.<br>
