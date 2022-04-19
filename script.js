@@ -79,9 +79,10 @@ const updatePainter = (painter, paths) => {
 	if (painter.isPainting) {
 		const path = paths.last
 		const angle = Math.atan2(previous.dx, previous.dy)
-		const length = Math.hypot(painter.dx, painter.dy) / 2
+		const length = Math.hypot((previous.dx)/2, (previous.dy)/2) / 2
 		const control = {x: length * Math.sin(angle), y: length * Math.cos(angle)}
 		path.quadraticCurveTo(previous.x + control.x, previous.y + control.y, painter.x, painter.y)
+		//path.lineTo(painter.x, painter.y)
 	}
 
 }
@@ -91,6 +92,8 @@ const updatePainter = (painter, paths) => {
 //======//
 const drawPaths = (context, paths) => {
 	context.strokeStyle = Colour.White
+	context.lineWidth = 10
+	context.lineCap = "round"
 	for (const path of paths) {
 		context.stroke(path)
 	}
