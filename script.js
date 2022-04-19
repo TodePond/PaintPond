@@ -67,6 +67,8 @@ const updatePainter = (painter, paths) => {
 	const [mx, my] = Mouse.position
 	const mouse = {x: mx, y: my}
 
+	const previous = {x: painter.x, y: painter.y, dx: painter.dx, dy: painter.dy}
+
 	for (const position of ["x", "y"]) {
 		const speed = `d${position}`
 		if (mouse[position] === undefined) continue
@@ -76,7 +78,14 @@ const updatePainter = (painter, paths) => {
 
 	if (painter.isPainting) {
 		const path = paths.last
-		path.lineTo(painter.x, painter.y)
+
+		const angle = Math.atan2(previous.dx, previous.dy)
+		const length = 100
+		const control = {x: length * Math.sin(angle), y: length * Math.cos(angle)}
+
+		print(control)
+
+		path.quadraticCurveTo(previous.x + control.x, previous.y + control.y, painter.x, painter.y)
 	}
 
 }
@@ -87,7 +96,7 @@ const updatePainter = (painter, paths) => {
 const drawPaths = (context, paths) => {
 	context.strokeStyle = Colour.White
 	for (const path of paths) {
-		context.stroke(path.d)
+		context.stroke(path)
 	}
 }
 
@@ -128,5 +137,20 @@ show.tick = (context) => {
 
 }
 
+//=======//
+// EVENT //
+//=======//
 on.contextmenu(e => e.preventDefault(), {passive: false})
+
+const KEYDOWN = {}
+on.keydown(e => {
+	const func = KEYDOWN[e.key]
+	if (func === undefined) return
+	func(e)
+})
+
+KEYDOWN["r"] = () => {
+	global.paths = []
+	global.painter.isPainting = false
+}
 
