@@ -78,13 +78,9 @@ const updatePainter = (painter, paths) => {
 
 	if (painter.isPainting) {
 		const path = paths.last
-
 		const angle = Math.atan2(previous.dx, previous.dy)
-		const length = 100
+		const length = Math.hypot(painter.dx, painter.dy) / 2
 		const control = {x: length * Math.sin(angle), y: length * Math.cos(angle)}
-
-		print(control)
-
 		path.quadraticCurveTo(previous.x + control.x, previous.y + control.y, painter.x, painter.y)
 	}
 
