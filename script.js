@@ -35,6 +35,7 @@ const makePainter = ({
 		maxSpeed,
 		minSpeed,
 		acceleration,
+		isPainting: false,
 	}
 	return painter
 }
@@ -47,10 +48,21 @@ const drawPainter = (context, painter) => {
 	context.drawImage(image, x, y, width, height)
 }
 
-const updatePainter = (painter) => {
+const updatePainter = (painter, paths) => {
 
 	const acceleration = painter.acceleration * (Mouse.Right? -1 : 1)
 	painter.speed = clamp(painter.speed + acceleration, painter.minSpeed, painter.maxSpeed)
+
+	if (Mouse.Left) {
+		if (!painter.isPainting) {
+			painter.isPainting = true
+			const path = new Path2D()
+			paths.push(path)
+			path.moveTo(painter.x, painter.y)
+		}
+	} else {
+		painter.isPainting = false
+	}
 
 	const [mx, my] = Mouse.position
 	const mouse = {x: mx, y: my}
@@ -62,7 +74,24 @@ const updatePainter = (painter) => {
 		painter[position] += painter[speed]
 	}
 
+	if (painter.isPainting) {
+		const path = paths.last
+		path.lineTo(painter.x, painter.y)
+	}
+
 }
+
+//======//
+// PATH //
+//======//
+const drawPaths = (context, paths) => {
+	context.strokeStyle = Colour.White
+	for (const path of paths) {
+		context.stroke(path.d)
+	}
+}
+
+//--------------------- NO GLOBAL STATE ABOVE THIS LINE ---------------------//
 
 //==============//
 // GLOBAL STATE //
@@ -74,8 +103,9 @@ const global = {
 		offsetX: 0,
 		offsetY: -65,
 		speed: 0.1,
-		minSpeed: 0.05,
+		minSpeed: 0.035,
 	}),
+	paths: [],
 }
 
 //======//
@@ -92,7 +122,8 @@ show.tick = (context) => {
 	const {canvas} = context
 	context.clearRect(0, 0, canvas.width, canvas.height)
 
-	updatePainter(global.painter)
+	updatePainter(global.painter, global.paths)
+	drawPaths(context, global.paths)
 	drawPainter(context, global.painter)
 
 }
