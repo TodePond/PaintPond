@@ -54,7 +54,7 @@ const drawPainter = (context, painter) => {
 	context.translate(-x, -y)
 }
 
-const updatePainter = (painter, paths) => {
+const updatePainter = (painter, paths, colour) => {
 
 	const acceleration = painter.acceleration * (Mouse.Right? -1 : 1)
 	painter.speed = clamp(painter.speed + acceleration, painter.minSpeed, painter.maxSpeed)
@@ -64,6 +64,7 @@ const updatePainter = (painter, paths) => {
 			painter.isPainting = true
 			const path = new Path2D()
 			paths.push(path)
+			path.colour = colour
 			path.moveTo(painter.x, painter.y)
 		}
 	} else {
@@ -99,10 +100,10 @@ const updatePainter = (painter, paths) => {
 // PATH //
 //======//
 const drawPaths = (context, paths) => {
-	context.strokeStyle = Colour.White
 	context.lineWidth = 10
 	context.lineCap = "round"
 	for (const path of paths) {
+		context.strokeStyle = path.colour
 		context.stroke(path)
 	}
 }
@@ -122,6 +123,7 @@ const global = {
 		minSpeed: 0.035,
 	}),
 	paths: [],
+	colour: Colour.White,
 }
 
 //======//
@@ -138,7 +140,7 @@ show.tick = (context) => {
 	const {canvas} = context
 	context.clearRect(0, 0, canvas.width, canvas.height)
 
-	updatePainter(global.painter, global.paths)
+	updatePainter(global.painter, global.paths, global.colour)
 	drawPaths(context, global.paths)
 	drawPainter(context, global.painter)
 
@@ -161,3 +163,5 @@ KEYDOWN["r"] = () => {
 	global.painter.isPainting = false
 }
 
+KEYDOWN["1"] = () => global.colour = Colour.White
+KEYDOWN["2"] = () => global.colour = Colour.Red
