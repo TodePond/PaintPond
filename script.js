@@ -19,6 +19,7 @@ const makePainter = ({
 	maxSpeed = speed,
 	minSpeed = maxSpeed * 0.3,
 	acceleration = 0.001,
+	dr = 0.05,
 } = {}) => {
 	const image = new Image()
 	image.src = source
@@ -29,6 +30,7 @@ const makePainter = ({
 		y: 0,
 		dx: 0,
 		dy: 0,
+		dr,
 		offsetX,
 		offsetY,
 		speed,
@@ -104,7 +106,7 @@ const updatePainter = (painter, paths, colour) => {
 		painter[position] += painter[speed]
 	}
 
-	painter.r = painter.dx * 0.01 + painter.dy * -0.01
+	painter.r = painter.dx * painter.dr + painter.dy * -painter.dr
 
 	const newBrush = getBrushPosition(painter)
 
