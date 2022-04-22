@@ -24,6 +24,7 @@ const makePainter = ({
 	dr = 0.05,
 	frameRate = 24,
 	speedR = 1.0,
+	idleFadePower = 1.0,
 } = {}) => {
 
 	const images = []
@@ -58,6 +59,7 @@ const makePainter = ({
 		r: 0,
 		targetR: 0,
 		speedR,
+		idleFadePower,
 	}
 	return painter
 }
@@ -95,6 +97,14 @@ const getBrushPosition = (painter) => {
 }
 
 const updatePainter = (painter, paths, colour) => {
+
+	if (painter.isPainting) {
+		painter.idleFadePower -= 0.01
+	} else {
+		painter.idleFadePower += 0.01
+	}
+	
+	painter.idleFadePower = clamp(painter.idleFadePower, 0.0, 1.0)
 
 	painter.age++
 	if (painter.age > 255) {
@@ -149,7 +159,11 @@ const updatePainter = (painter, paths, colour) => {
 		const angle = Math.atan2(previous.dx, previous.dy)
 		const length = Math.hypot((previous.dx / 2), (previous.dy / 2)) / 2
 		const control = {x: length * Math.sin(angle), y: length * Math.cos(angle)}
-		path.quadraticCurveTo(previous.x + control.x, previous.y + control.y, newBrush.x, newBrush.y)
+		if (Math.hypot(painter.brushdx, painter.brushdy) < 5) {
+			path.lineTo(newBrush.x, newBrush.y)
+		} else {
+			path.quadraticCurveTo(previous.x + control.x, previous.y + control.y, newBrush.x, newBrush.y)
+		}
 		//path.lineTo(painter.x, painter.y)
 	}
 
@@ -203,10 +217,8 @@ show.tick = (context) => {
 	const {canvas} = context
 	context.clearRect(0, 0, canvas.width, canvas.height)
 	updatePainter(global.painter, global.paths, global.colour)
-	if (!global.painter.isPainting) {
-		global.painter.x += 2*Math.sin(performance.now() / 500) // 
-		global.painter.y += 2*Math.sin(performance.now() / 600) // these need to be different!
-	}
+	global.painter.x += (2*Math.sin(performance.now() / 500)) * global.painter.idleFadePower
+	global.painter.y += (2*Math.sin(performance.now() / 600)) * global.painter.idleFadePower
 	drawPaths(context, global.paths)
 	drawPainter(context, global.painter)
 }
