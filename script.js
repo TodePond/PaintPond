@@ -19,7 +19,7 @@ const makePainter = ({
 	maxSpeed = speed,
 	minSpeed = maxSpeed * 0.3,
 	acceleration = 0.001,
-	dr = 0.05,
+	dr = 0.08,
 	frameRate = 24,
 } = {}) => {
 
