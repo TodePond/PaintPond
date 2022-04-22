@@ -181,7 +181,7 @@ const global = {
 		offsetX: -25,
 		offsetY: -107.5,
 		speed: 0.1,
-		dr: 0.05,
+		dr: 0.06,
 		minSpeed: 0.035,
 		speedR: 0.5,
 	}),
