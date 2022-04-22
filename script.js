@@ -14,6 +14,8 @@ const makePainter = ({
 	sources,
 	offsetX = 0,
 	offsetY = 0,
+	centerX = 0.5,
+	centerY = 0.5,
 	scale = 1.0,
 	speed = 0.1,
 	maxSpeed = speed,
@@ -43,6 +45,8 @@ const makePainter = ({
 		dr,
 		offsetX,
 		offsetY,
+		centerX,
+		centerY,
 		speed,
 		maxSpeed,
 		minSpeed,
@@ -60,11 +64,11 @@ const drawPainter = (context, painter) => {
 	const image = images[frame]
 	const [width, height] = ["width", "height"].map(dimension => image[dimension] * scale)
 
-	const center = {x: painter.x + width/2, y: painter.y + height/2}
+	const center = {x: painter.x + width * painter.centerX, y: painter.y + height * painter.centerY}
 
 	context.translate(center.x, center.y)
 	context.rotate(r)
-	context.drawImage(image, -width/2, -height/2, width, height)
+	context.drawImage(image, -width * painter.centerX, -height * painter.centerY, width, height)
 	context.rotate(-r)
 	context.translate(-center.x, -center.y)
 }
@@ -82,8 +86,8 @@ const getBrushPosition = (painter) => {
 	const image = painter.images[painter.frame]
 	const x = painter.x - painter.offsetX * painter.scale
 	const y = painter.y - painter.offsetY * painter.scale
-	const cx = painter.x + image.width/2 * painter.scale
-	const cy = painter.y + image.height/2 * painter.scale
+	const cx = painter.x + image.width*painter.centerX * painter.scale
+	const cy = painter.y + image.height*painter.centerY * painter.scale
 	return rotatePoint(cx, cy, x, y, painter.r)
 }
 
@@ -216,3 +220,11 @@ KEYDOWN["r"] = () => {
 
 KEYDOWN["1"] = () => global.colour = Colour.White
 KEYDOWN["2"] = () => global.colour = Colour.Red
+KEYDOWN["3"] = () => global.colour = Colour.Green
+KEYDOWN["4"] = () => global.colour = Colour.Blue
+KEYDOWN["5"] = () => global.colour = Colour.Yellow
+KEYDOWN["6"] = () => global.colour = Colour.Orange
+KEYDOWN["7"] = () => global.colour = Colour.Pink
+KEYDOWN["8"] = () => global.colour = Colour.Rose
+KEYDOWN["9"] = () => global.colour = Colour.Cyan
+KEYDOWN["0"] = () => global.colour = Colour.Purple
