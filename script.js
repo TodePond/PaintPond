@@ -11,7 +11,7 @@ const clamp = (n, min, max) => {
 // PAINTER //
 //=========//
 const makePainter = ({
-	source,
+	sources,
 	offsetX = 0,
 	offsetY = 0,
 	scale = 1.0,
@@ -20,11 +20,21 @@ const makePainter = ({
 	minSpeed = maxSpeed * 0.3,
 	acceleration = 0.001,
 	dr = 0.05,
+	frameRate = 24,
 } = {}) => {
-	const image = new Image()
-	image.src = source
+
+	const images = []
+	for (const source of sources) {
+		const image = new Image()
+		image.src = source
+		images.push(image)
+	}
+
 	const painter = {
-		image,
+		images,
+		frame: 0,
+		frameRate,
+		age: 0,
 		scale,
 		x: 0,
 		y: 0,
@@ -46,7 +56,8 @@ const makePainter = ({
 }
 
 const drawPainter = (context, painter) => {
-	const {image, scale, r} = painter
+	const {images, frame, scale, r} = painter
+	const image = images[frame]
 	const [width, height] = ["width", "height"].map(dimension => image[dimension] * scale)
 
 	const center = {x: painter.x + width/2, y: painter.y + height/2}
@@ -68,14 +79,26 @@ function rotatePoint (cx, cy, x, y, angle) {
 }
 
 const getBrushPosition = (painter) => {
+	const image = painter.images[painter.frame]
 	const x = painter.x - painter.offsetX * painter.scale
 	const y = painter.y - painter.offsetY * painter.scale
-	const cx = painter.x + painter.image.width/2 * painter.scale
-	const cy = painter.y + painter.image.height/2 * painter.scale
+	const cx = painter.x + image.width/2 * painter.scale
+	const cy = painter.y + image.height/2 * painter.scale
 	return rotatePoint(cx, cy, x, y, painter.r)
 }
 
 const updatePainter = (painter, paths, colour) => {
+
+	painter.age++
+	if (painter.age > 255) {
+		painter.age = 0
+	}
+	if (painter.age % (60 / painter.frameRate) === 0) {
+		painter.frame++
+		if (painter.frame >= painter.images.length) {
+			painter.frame = 0
+		}
+	}
 
 	const acceleration = painter.acceleration * (Mouse.Right? -1 : 1)
 	painter.speed = clamp(painter.speed + acceleration, painter.minSpeed, painter.maxSpeed)
@@ -143,10 +166,10 @@ const drawPaths = (context, paths) => {
 //==============//
 const global = {
 	painter: makePainter({
-		source: "images/tode.png",
+		sources: ["images/berd0.png", "images/berd1.png"],
 		scale: 0.5,
-		offsetX: 0,
-		offsetY: -65,
+		offsetX: -25,
+		offsetY: -107.5,
 		speed: 0.1,
 		minSpeed: 0.035,
 	}),
