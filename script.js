@@ -202,11 +202,13 @@ show.resize = (context) => {
 show.tick = (context) => {
 	const {canvas} = context
 	context.clearRect(0, 0, canvas.width, canvas.height)
-
 	updatePainter(global.painter, global.paths, global.colour)
+	if (!global.painter.isPainting) {
+		global.painter.x += 2*Math.sin(performance.now() / 500) // 
+		global.painter.y += 2*Math.sin(performance.now() / 600) // these need to be different!
+	}
 	drawPaths(context, global.paths)
 	drawPainter(context, global.painter)
-
 }
 
 //=======//
