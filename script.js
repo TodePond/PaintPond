@@ -145,6 +145,9 @@ const updatePainter = (painter, paths, colour) => {
 		painter[speed] = (mouse[position] - painter[position]) * painter.speed
 		painter[position] += painter[speed]
 	}
+	
+	global.painter.x += (2*Math.sin(performance.now() / 500)) * global.painter.idleFadePower
+	global.painter.y += (2*Math.sin(performance.now() / 600)) * global.painter.idleFadePower
 
 	painter.targetR = painter.dx * painter.dr + painter.dy * -painter.dr
 	painter.r += (painter.targetR - painter.r) * painter.speedR
@@ -159,11 +162,11 @@ const updatePainter = (painter, paths, colour) => {
 		const angle = Math.atan2(previous.dx, previous.dy)
 		const length = Math.hypot((previous.dx / 2), (previous.dy / 2)) / 2
 		const control = {x: length * Math.sin(angle), y: length * Math.cos(angle)}
-		if (Math.hypot(painter.brushdx, painter.brushdy) < 5) {
+		/*if (false && Math.hypot(painter.brushdx, painter.brushdy) < 5) {
 			path.lineTo(newBrush.x, newBrush.y)
-		} else {
-			path.quadraticCurveTo(previous.x + control.x, previous.y + control.y, newBrush.x, newBrush.y)
-		}
+		} else {*/
+		path.quadraticCurveTo(previous.x + control.x, previous.y + control.y, newBrush.x, newBrush.y)
+		//}
 		//path.lineTo(painter.x, painter.y)
 	}
 
@@ -217,8 +220,6 @@ show.tick = (context) => {
 	const {canvas} = context
 	context.clearRect(0, 0, canvas.width, canvas.height)
 	updatePainter(global.painter, global.paths, global.colour)
-	global.painter.x += (2*Math.sin(performance.now() / 500)) * global.painter.idleFadePower
-	global.painter.y += (2*Math.sin(performance.now() / 600)) * global.painter.idleFadePower
 	drawPaths(context, global.paths)
 	drawPainter(context, global.painter)
 }
