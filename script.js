@@ -23,6 +23,7 @@ const makePainter = ({
 	acceleration = 0.001,
 	dr = 0.05,
 	frameRate = 24,
+	speedR = 1.0,
 } = {}) => {
 
 	const images = []
@@ -55,6 +56,8 @@ const makePainter = ({
 		brushdx: 0,
 		brushdy: 0,
 		r: 0,
+		targetR: 0,
+		speedR,
 	}
 	return painter
 }
@@ -133,7 +136,8 @@ const updatePainter = (painter, paths, colour) => {
 		painter[position] += painter[speed]
 	}
 
-	painter.r = painter.dx * painter.dr + painter.dy * -painter.dr
+	painter.targetR = painter.dx * painter.dr + painter.dy * -painter.dr
+	painter.r += (painter.targetR - painter.r) * painter.speedR
 
 	const newBrush = getBrushPosition(painter)
 
@@ -172,10 +176,14 @@ const global = {
 	painter: makePainter({
 		sources: ["images/berd0.png", "images/berd1.png"],
 		scale: 0.5,
+		centerY: 0.35,
+		centerX: 0.6,
 		offsetX: -25,
 		offsetY: -107.5,
-		speed: 0.1,
+		speed: 0.07,
+		dr: 0.06,
 		minSpeed: 0.035,
+		speedR: 0.5,
 	}),
 	paths: [],
 	colour: Colour.White,
