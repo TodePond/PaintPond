@@ -61,6 +61,7 @@ const makePainter = ({
 		targetR: 0,
 		speedR,
 		idleFadePower,
+		idleFrequency,
 	}
 	return painter
 }
