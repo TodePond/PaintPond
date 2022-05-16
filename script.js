@@ -25,6 +25,7 @@ const makePainter = ({
 	frameRate = 24,
 	speedR = 1.0,
 	idleFadePower = 1.0,
+	idleFrequency = { x: 500, y: 750 }
 } = {}) => {
 
 	const images = []
@@ -60,6 +61,7 @@ const makePainter = ({
 		targetR: 0,
 		speedR,
 		idleFadePower,
+		idleFrequency,
 	}
 	return painter
 }
@@ -146,8 +148,8 @@ const updatePainter = (painter, paths, colour) => {
 		painter[position] += painter[speed]
 	}
 	
-	global.painter.x += (2*Math.sin(performance.now() / 500)) * global.painter.idleFadePower
-	global.painter.y += (2*Math.sin(performance.now() / 600)) * global.painter.idleFadePower
+	global.painter.x += (2*Math.sin(performance.now() / global.painter.idleFrequency.x)) * global.painter.idleFadePower
+	global.painter.y += (2*Math.sin(performance.now() / global.painter.idleFrequency.y)) * global.painter.idleFadePower
 
 	painter.targetR = painter.dx * painter.dr + painter.dy * -painter.dr
 	painter.r += (painter.targetR - painter.r) * painter.speedR
