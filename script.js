@@ -201,10 +201,10 @@ const global = {
 		offsetY: -107.5,
 		speed: 0.1,
 		minSpeed: 0.035,
-		maxSpeed: 0.1,
-		dr: 0.3,
-		speedR: 0.01,
-		acceleration: 0.001,
+		maxSpeed: 0.2,
+		dr: 0.1,
+		speedR: 0.4,
+		acceleration: 0.0005,
 	}),
 	paths: [],
 	colour: Colour.White,
@@ -255,3 +255,5 @@ KEYDOWN["7"] = () => global.colour = Colour.Pink
 KEYDOWN["8"] = () => global.colour = Colour.Rose
 KEYDOWN["9"] = () => global.colour = Colour.Cyan
 KEYDOWN["0"] = () => global.colour = Colour.Purple
+
+KEYDOWN["x"] = () => global.paths.pop()
