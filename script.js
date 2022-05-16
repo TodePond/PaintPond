@@ -198,9 +198,11 @@ const global = {
 		offsetX: -25,
 		offsetY: -107.5,
 		speed: 0.1,
-		dr: 0.06,
 		minSpeed: 0.035,
-		speedR: 0.5,
+		maxSpeed: 0.1,
+		dr: 0.3,
+		speedR: 0.01,
+		acceleration: 0.001,
 	}),
 	paths: [],
 	colour: Colour.White,
@@ -212,7 +214,7 @@ const global = {
 const show = Show.make()
 
 show.resize = (context) => {
-	context.canvas.style["background-color"] = Colour.Black
+	context.canvas.style["background-color"] = "#00ff40"
 	context.canvas.style["cursor"] = "none"
 }
 
