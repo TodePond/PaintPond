@@ -216,7 +216,7 @@ const global = {
 const show = Show.make()
 
 show.resize = (context) => {
-	context.canvas.style["background-color"] = "#00ff40"
+	context.canvas.style["background-color"] = Colour.multiply(Colour.Blue, {lightness: 0.5})
 	context.canvas.style["cursor"] = "none"
 }
 
