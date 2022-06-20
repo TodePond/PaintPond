@@ -1,5 +1,5 @@
 # PaintPond
-paint with a painter. This is something I made for this video: [https://youtu.be/WMJ1H3Ai-qs](https://youtu.be/WMJ1H3Ai-qs)
+paint with a painter. This is something I made for this video: [youtu.be/WMJ1H3Ai-qs](https://youtu.be/WMJ1H3Ai-qs)
 
 Try it [here](https://iridescent-phoenix-827721.netlify.app/)!
 
