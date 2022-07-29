@@ -226,7 +226,7 @@ const show = Show.make()
 const BLUE_SCREEN_COLOUR = Colour.Black
 show.resize = (context) => {
 	context.canvas.style["background-color"] = BLUE_SCREEN_COLOUR
-	//context.canvas.style["cursor"] = "none"
+	context.canvas.style["cursor"] = "none"
 }
 
 show.tick = (context) => {
