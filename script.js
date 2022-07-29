@@ -98,7 +98,7 @@ const getBrushPosition = (painter) => {
 	return rotatePoint(cx, cy, x, y, painter.r)
 }
 
-const updatePainter = (painter, paths, colour) => {
+const updatePainter = (context, painter, paths, colour) => {
 
 	if (painter.isPainting) {
 		painter.idleFadePower -= 0.01
@@ -139,7 +139,8 @@ const updatePainter = (painter, paths, colour) => {
 
 	let [mx, my] = Mouse.position
 	if (mx !== undefined) {
-		my -= (1080 - my)/2
+		my -= (context.canvas.height - my)/3
+		mx -= (context.canvas.width - mx)/3
 	}
 	const mouse = {x: mx, y: my}
 	
@@ -225,13 +226,13 @@ const show = Show.make()
 const BLUE_SCREEN_COLOUR = Colour.Black
 show.resize = (context) => {
 	context.canvas.style["background-color"] = BLUE_SCREEN_COLOUR
-	context.canvas.style["cursor"] = "none"
+	//context.canvas.style["cursor"] = "none"
 }
 
 show.tick = (context) => {
 	const {canvas} = context
 	context.clearRect(0, 0, canvas.width, canvas.height)
-	updatePainter(global.painter, global.paths, global.colour)
+	updatePainter(context, global.painter, global.paths, global.colour)
 	drawPaths(context, global.paths)
 	drawPainter(context, global.painter)
 }
