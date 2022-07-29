@@ -183,7 +183,8 @@ const updatePainter = (painter, paths, colour) => {
 // PATH //
 //======//
 const drawPaths = (context, paths) => {
-	context.lineWidth = 250
+	//context.lineWidth = 250
+	context.lineWidth = 10
 	context.lineCap = "round"
 	for (const path of paths) {
 		context.strokeStyle = path.colour
@@ -199,7 +200,7 @@ const drawPaths = (context, paths) => {
 const global = {
 	painter: makePainter({
 		sources: ["images/berd0.png", "images/berd1.png"],
-		scale: 0.8,
+		scale: 0.5,
 		centerY: 0.35,
 		centerX: 0.55,
 		offsetX: -25,
@@ -212,7 +213,7 @@ const global = {
 		acceleration: 0.0002,
 	}),
 	paths: [],
-	colour: Colour.Black,
+	colour: Colour.White,
 }
 
 //======//
@@ -220,7 +221,8 @@ const global = {
 //======//
 const show = Show.make()
 
-const BLUE_SCREEN_COLOUR = Colour.multiply(Colour.Green, {lightness: 0.5})
+//const BLUE_SCREEN_COLOUR = Colour.multiply(Colour.Green, {lightness: 0.5})
+const BLUE_SCREEN_COLOUR = Colour.Black
 show.resize = (context) => {
 	context.canvas.style["background-color"] = BLUE_SCREEN_COLOUR
 	context.canvas.style["cursor"] = "none"
@@ -252,7 +254,7 @@ KEYDOWN["r"] = () => {
 }
 
 KEYDOWN["1"] = () => global.colour = Colour.Black
-KEYDOWN["2"] = () => global.colour = BLUE_SCREEN_COLOUR
+KEYDOWN["2"] = () => global.colour = Colour.Red
 KEYDOWN["3"] = () => global.colour = Colour.Green
 KEYDOWN["4"] = () => global.colour = Colour.Blue
 KEYDOWN["5"] = () => global.colour = Colour.Yellow
