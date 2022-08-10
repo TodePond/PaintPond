@@ -254,7 +254,7 @@ KEYDOWN["r"] = () => {
 	global.painter.isPainting = false
 }
 
-KEYDOWN["1"] = () => global.colour = Colour.Black
+KEYDOWN["1"] = () => global.colour = Colour.White
 KEYDOWN["2"] = () => global.colour = Colour.Red
 KEYDOWN["3"] = () => global.colour = Colour.Green
 KEYDOWN["4"] = () => global.colour = Colour.Blue
