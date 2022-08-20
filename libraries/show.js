@@ -35,8 +35,16 @@ const Show = {}
 		
 		const resize = () => {
 
-			show.canvas.width = Math.round(innerWidth * devicePixelRatio.d)
-			show.canvas.height = Math.round(innerHeight * devicePixelRatio.d)
+			show.canvas.width = Math.round(innerWidth * devicePixelRatio)
+			show.canvas.height = Math.round(innerHeight * devicePixelRatio)
+
+			window.shrinkScore = 1
+			if (show.canvas.width > 1920*2 || show.canvas.height > 1920*2) {
+				window.shrinkScore++
+				show.canvas.width = Math.round(show.canvas.width / 2)
+				show.canvas.height = Math.round(show.canvas.height / 2)
+			}
+
 			show.canvas.style["width"] = Math.round(innerWidth)
 			show.canvas.style["height"] = Math.round(innerHeight)
 			
