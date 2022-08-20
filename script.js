@@ -195,24 +195,47 @@ const drawPaths = (context, paths) => {
 
 //--------------------- NO GLOBAL STATE ABOVE THIS LINE ---------------------//
 
+//==========//
+// PAINTERS //
+//==========//
+const berd = makePainter({
+	sources: ["images/berd0.png", "images/berd1.png"],
+	scale: 0.5,
+	centerY: 0.35,
+	centerX: 0.55,
+	offsetX: -25,
+	offsetY: -107.5,
+	speed: 0.1,
+	minSpeed: 0.035,
+	maxSpeed: 0.2,
+	dr: 0.05,
+	speedR: 0.1,
+	acceleration: 0.0002,
+})
+
+const tode = makePainter({
+	sources: ["images/tode.png"],
+	scale: 0.5,
+	centerY: 0.35,
+	centerX: 0.55,
+	offsetX: -0,
+	offsetY: -70,
+	speed: 0.1,
+	minSpeed: 0.035,
+	maxSpeed: 0.2,
+	dr: 0.05,
+	speedR: 0.1,
+	acceleration: 0.0002,
+})
+
+const painters = [berd, tode]
+
 //==============//
 // GLOBAL STATE //
 //==============//
 const global = {
-	painter: makePainter({
-		sources: ["images/berd0.png", "images/berd1.png"],
-		scale: 0.5,
-		centerY: 0.35,
-		centerX: 0.55,
-		offsetX: -25,
-		offsetY: -107.5,
-		speed: 0.1,
-		minSpeed: 0.035,
-		maxSpeed: 0.2,
-		dr: 0.05,
-		speedR: 0.1,
-		acceleration: 0.0002,
-	}),
+	painterId: 0,
+	painter: painters[0],
 	paths: [],
 	colour: Colour.White,
 }
@@ -249,10 +272,19 @@ on.keydown(e => {
 	func(e)
 })
 
+KEYDOWN["x"] = () => {
+	global.paths.pop()
+	if (global.painter.isPainting) {
+		global.painter.isPainting = false
+	}
+}
+
 KEYDOWN["r"] = () => {
 	global.paths = []
 	global.painter.isPainting = false
 }
+
+KEYDOWN["c"] = KEYDOWN["r"]
 
 KEYDOWN["1"] = () => global.colour = Colour.White
 KEYDOWN["2"] = () => global.colour = Colour.Red
@@ -265,4 +297,12 @@ KEYDOWN["8"] = () => global.colour = Colour.Rose
 KEYDOWN["9"] = () => global.colour = Colour.Cyan
 KEYDOWN["0"] = () => global.colour = Colour.Purple
 
-KEYDOWN["x"] = () => global.paths.pop()
+
+KEYDOWN["Tab"] = (e) => {
+	global.painterId++
+	if (global.painterId >= painters.length) {
+		global.painterId = 0
+	}
+	global.painter = painters[global.painterId]
+	e.preventDefault()
+}
