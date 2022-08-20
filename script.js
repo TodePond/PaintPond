@@ -102,7 +102,7 @@ const getBrushPosition = (painter) => {
 	return rotatePoint(cx, cy, x, y, painter.r)
 }
 
-
+let lastBrushWasTouch = false
 let restingPosition = [0, 0]
 on.mousemove(() => restingPosition = Mouse.position.map(v => v * devicePixelRatio))
 on.touchstart(e => e.preventDefault(), {passive: false})
@@ -135,11 +135,15 @@ const updatePainter = (context, painter, paths, colour) => {
 
 	let [mx, my] = restingPosition
 	if (Touches.length > 0) {
+		lastBrushWasTouch = true
 		const [touch] = Touches
 		restingPosition = touch.position.map(v => v * devicePixelRatio)
 		;[mx, my] = restingPosition
 	}
-	if (mx !== undefined) {
+
+	if (Mouse.Left) lastBrushWasTouch = false
+
+	if (!lastBrushWasTouch && mx !== undefined) {
 		my -= (context.canvas.height - my)/3
 		mx -= (context.canvas.width - mx)/3
 	}
