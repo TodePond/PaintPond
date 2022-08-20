@@ -340,7 +340,7 @@ show.tick = (context) => {
 	drawPainter(context, global.painter)
 }
 
-on.load(() => show.resize(show.context))
+on.load(() => trigger("resize"))
 
 //=======//
 // EVENT //
