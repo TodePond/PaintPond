@@ -260,6 +260,8 @@ show.tick = (context) => {
 	drawPainter(context, global.painter)
 }
 
+on.load(() => show.resize(show.context))
+
 //=======//
 // EVENT //
 //=======//
@@ -296,7 +298,6 @@ KEYDOWN["7"] = () => global.colour = Colour.Pink
 KEYDOWN["8"] = () => global.colour = Colour.Rose
 KEYDOWN["9"] = () => global.colour = Colour.Cyan
 KEYDOWN["0"] = () => global.colour = Colour.Purple
-
 
 KEYDOWN["Tab"] = (e) => {
 	global.painterId++
