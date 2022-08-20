@@ -21,10 +21,10 @@ const Show = {}
 		if (show.canvas === undefined) {
 			document.body.style["margin"] = "0px"
 			document.body.style["overflow"] = "hidden"
-			document.body.style["background-color"] = Colour.Void
+			document.body.style["background-color"] = Colour.Black
 
 			show.canvas = document.createElement("canvas")
-			show.canvas.style["background-color"] = Colour.Void
+			show.canvas.style["background-color"] = Colour.Black
 			show.canvas.style["image-rendering"] = "pixelated"
 			document.body.appendChild(show.canvas)
 		}

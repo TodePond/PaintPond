@@ -1,3 +1,5 @@
+import { getStroke, getStrokeOutlinePoints } from "./libraries/perfect-freehand.js"
+
 //========//
 // USEFUL //
 //========//
@@ -25,7 +27,8 @@ const makePainter = ({
 	frameRate = 24,
 	speedR = 1.0,
 	idleFadePower = 1.0,
-	idleFrequency = { x: 500, y: 750 }
+	idleFrequency = { x: 500, y: 750 },
+	strokeOptions = {},
 } = {}) => {
 
 	const images = []
@@ -62,6 +65,7 @@ const makePainter = ({
 		speedR,
 		idleFadePower,
 		idleFrequency,
+		strokeOptions,
 	}
 	return painter
 }
@@ -127,10 +131,10 @@ const updatePainter = (context, painter, paths, colour) => {
 	if (Mouse.Left) {
 		if (!painter.isPainting) {
 			painter.isPainting = true
-			const path = new Path2D()
+			const path = []
 			paths.push(path)
 			path.colour = colour
-			path.moveTo(brush.x, brush.y)
+			path.push([brush.x, brush.y])
 		}
 	} else {
 		painter.isPainting = false
@@ -143,9 +147,6 @@ const updatePainter = (context, painter, paths, colour) => {
 		mx -= (context.canvas.width - mx)/3
 	}
 	const mouse = {x: mx, y: my}
-	
-
-	const previous = {x: brush.x, y: brush.y, dx: painter.brushdx, dy: painter.brushdy}
 
 	for (const position of ["x", "y"]) {
 		const speed = `d${position}`
@@ -167,15 +168,7 @@ const updatePainter = (context, painter, paths, colour) => {
 	
 	if (painter.isPainting) {
 		const path = paths.last
-		const angle = Math.atan2(previous.dx, previous.dy)
-		const length = Math.hypot((previous.dx / 2), (previous.dy / 2)) / 2
-		const control = {x: length * Math.sin(angle), y: length * Math.cos(angle)}
-		/*if (false && Math.hypot(painter.brushdx, painter.brushdy) < 5) {
-			path.lineTo(newBrush.x, newBrush.y)
-		} else {*/
-		path.quadraticCurveTo(previous.x + control.x, previous.y + control.y, newBrush.x, newBrush.y)
-		//}
-		//path.lineTo(painter.x, painter.y)
+		path.push([newBrush.x, newBrush.y])
 	}
 
 }
@@ -183,14 +176,69 @@ const updatePainter = (context, painter, paths, colour) => {
 //======//
 // PATH //
 //======//
-const drawPaths = (context, paths) => {
+const drawPaths = (context, painter, paths) => {
 	//context.lineWidth = 250
 	context.lineWidth = 10
 	context.lineCap = "round"
-	for (const path of paths) {
-		context.strokeStyle = path.colour
-		context.stroke(path)
+	for (let i = 0; i < paths.length; i++) {
+		let path = paths[i]
+
+		if (!(path instanceof Path2D)) {
+			const stroke = getStroke(path, painter.strokeOptions)
+			const [head, ...tail] = getSmootherStroke(stroke, 3)
+
+			const strokePath = new Path2D()
+			if (!painter.isPainting || path !== paths.last) {
+				paths[i] = strokePath
+			}
+
+			strokePath.moveTo(...head)
+			for (const [x, y] of tail) {
+				strokePath.lineTo(x, y)
+			}
+			
+			strokePath.colour = path.colour
+			path = strokePath
+		}
+
+		//context.strokeStyle = path.colour
+		//context.stroke(path)
+
+		context.fillStyle = path.colour
+		context.fill(path)
 	}
+}
+
+const getSmootherStroke = (stroke, iterations = 1) => {
+	const [head] = stroke
+	const smootherStroke = [head]
+	for (let i = 1; i < stroke.length; i++) {
+
+		let previous = stroke[i-1]
+		const point = stroke[i]
+		let next = stroke[i+1]
+		
+		if (previous === undefined) previous = point
+		if (next === undefined) next = point
+
+		const [px, py] = previous
+		const [x, y] = point
+		const [nx, ny] = next
+
+		const points = [
+			[px*3+x*2+nx, py*3+y*2+ny].map(v => v/6),
+			[px+x+nx, py+y+ny].map(v => v/3),
+			[px+x*2+nx*3, py+y*2+ny*3].map(v => v/6),
+
+		]
+		
+		smootherStroke.push(...points)
+	}
+
+	iterations--
+	if (iterations > 0) return getSmootherStroke(smootherStroke, iterations)
+
+	return smootherStroke
 }
 
 //--------------------- NO GLOBAL STATE ABOVE THIS LINE ---------------------//
@@ -211,6 +259,12 @@ const berd = makePainter({
 	dr: 0.05,
 	speedR: 0.1,
 	acceleration: 0.0002,
+	strokeOptions: {
+		smoothing: 1.0,
+		streamline: 0.6,
+		thinning: 0.5,
+		last: true,
+	},
 })
 
 const tode = makePainter({
@@ -226,6 +280,7 @@ const tode = makePainter({
 	dr: 0.05,
 	speedR: 0.05,
 	acceleration: 0.00001,
+	strokeOptions: berd.strokeOptions,
 })
 
 const painters = [berd, tode]
@@ -239,6 +294,8 @@ const global = {
 	paths: [],
 	colour: Colour.White,
 }
+
+window.global = global
 
 //======//
 // SHOW //
@@ -256,7 +313,7 @@ show.tick = (context) => {
 	const {canvas} = context
 	context.clearRect(0, 0, canvas.width, canvas.height)
 	updatePainter(context, global.painter, global.paths, global.colour)
-	drawPaths(context, global.paths)
+	drawPaths(context, global.painter, global.paths)
 	drawPainter(context, global.painter)
 }
 
