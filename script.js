@@ -220,12 +220,12 @@ const tode = makePainter({
 	centerX: 0.55,
 	offsetX: -0,
 	offsetY: -70,
-	speed: 0.1,
-	minSpeed: 0.035,
-	maxSpeed: 0.2,
+	speed: 0.09,
+	minSpeed: 0.01,
+	maxSpeed: 0.15,
 	dr: 0.05,
-	speedR: 0.1,
-	acceleration: 0.0002,
+	speedR: 0.05,
+	acceleration: 0.00001,
 })
 
 const painters = [berd, tode]
