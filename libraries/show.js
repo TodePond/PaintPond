@@ -39,7 +39,7 @@ const Show = {}
 			show.canvas.height = Math.round(innerHeight * devicePixelRatio)
 
 			window.shrinkScore = 1
-			if (show.canvas.width > 1920*2 || show.canvas.height > 1920*2) {
+			if (show.canvas.width > 1920 || show.canvas.height > 1920) {
 				window.shrinkScore++
 				show.canvas.width = Math.round(show.canvas.width / 2)
 				show.canvas.height = Math.round(show.canvas.height / 2)
