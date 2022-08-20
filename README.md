@@ -12,3 +12,18 @@ Press the 3 key for etc...
 Press X to undo!<br>
 Press C to clear the screen!<br>
 Press tab to change characters!
+
+## Running Locally
+To run locally...<br>
+you need to run a local server because it uses javascript modules.<br>
+(ie: you can't just open `index.html` like most of my other projects)<br>
+
+I recommend getting [deno](https://deno.land)
+and then installing `file_server` with this command:
+```
+deno install --allow-read --allow-net -f https://deno.land/std@0.142.0/http/file_server.ts
+```
+Then you can run this command to run a local server:
+```
+file_server
+```
