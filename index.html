@@ -2,3 +2,20 @@
 <script>Habitat.install(window)</script>
 <script src="show.js"></script>
 <script src="script.js"></script>
+<script>
+  const titles = [
+    'PaintPond.cool',
+    'PaintPond is cool',
+    'Try and draw a smile',
+    'Amgery Berd with a paintbrush',
+    'Berd goes Wild!',
+    'Draw with Berd!',
+    'Oh no Berd has a paintbrush',
+    'Who gave Berd that brush',
+    'Chaos... In a good way',
+    'beautiful art',
+    // hmm how many more can there be...
+  ]
+  const title = titles[Math.floor(Math.random() * titles.length)] // pick random title
+  document.title = title
+</script>
