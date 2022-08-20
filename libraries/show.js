@@ -38,10 +38,10 @@ const Show = {}
 			const margin = `${(100 - show.scale*100)/2}` + (innerWidth > innerHeight? "vh" : "vw")
 
 
-			show.canvas.width = Math.round(innerWidth * show.scale)
-			show.canvas.height = Math.round(innerHeight * show.scale)
-			show.canvas.style["width"] = show.canvas.width
-			show.canvas.style["height"] = show.canvas.height
+			show.canvas.width = Math.round(innerWidth * show.scale) * devicePixelRatio
+			show.canvas.height = Math.round(innerHeight * show.scale) * devicePixelRatio
+			show.canvas.style["width"] = Math.round(innerWidth * show.scale)
+			show.canvas.style["height"] = Math.round(innerHeight * show.scale)
 			
 			show.canvas.style["margin-top"] = margin
 			show.canvas.style["margin-bottom"] = margin
