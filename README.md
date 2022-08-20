@@ -1,7 +1,7 @@
 # PaintPond
 Paint with a painter. This is something I made for this video: [youtu.be/WMJ1H3Ai-qs](https://youtu.be/WMJ1H3Ai-qs)
 
-Try it [here](https://paintpond.cool)!
+Try it at [paintpond.cool](https://paintpond.cool)!
 
 Move the mouse to move the painter.<br>
 Left-click to paint<br>
