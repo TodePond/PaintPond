@@ -102,6 +102,10 @@ const getBrushPosition = (painter) => {
 	return rotatePoint(cx, cy, x, y, painter.r)
 }
 
+
+let restingPosition = [0, 0]
+on.mousemove(() => restingPosition = Mouse.position)
+
 const updatePainter = (context, painter, paths, colour) => {
 
 	if (painter.isPainting) {
@@ -128,25 +132,39 @@ const updatePainter = (context, painter, paths, colour) => {
 
 	const brush = getBrushPosition(painter)
 
-	if (Mouse.Left) {
-		if (!painter.isPainting) {
-			painter.isPainting = true
-			const path = []
-			paths.push(path)
-			path.colour = colour
-			path.push([brush.x, brush.y])
-		}
-	} else {
-		painter.isPainting = false
+	let [mx, my] = restingPosition
+	if (Touches.length > 0) {
+		const [touch] = Touches
+		;[mx, my] = touch.position
+		restingPosition = touch.position
 	}
-
-
-	let [mx, my] = Mouse.position
 	if (mx !== undefined) {
 		my -= (context.canvas.height - my)/3
 		mx -= (context.canvas.width - mx)/3
 	}
 	const mouse = {x: mx, y: my}
+
+	if (Mouse.Left || Touches.length > 0) {
+		if (!painter.isPainting) {
+			
+			let isCloseEnough = true
+			if (Touches.length > 0) {
+				const displacement = [mx - painter.x, my - painter.y]
+				const distance = Math.hypot(...displacement)
+				if (distance > 50) isCloseEnough = false
+			}
+
+			if (isCloseEnough) {
+				painter.isPainting = true
+				const path = []
+				paths.push(path)
+				path.colour = colour
+				path.push([brush.x, brush.y])
+			}
+		}
+	} else {
+		painter.isPainting = false
+	}
 
 	for (const position of ["x", "y"]) {
 		const speed = `d${position}`
