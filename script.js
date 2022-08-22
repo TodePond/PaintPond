@@ -146,6 +146,9 @@ const updatePainter = (context, painter, paths, colour) => {
 	if (!lastBrushWasTouch && mx !== undefined) {
 		my -= (context.canvas.height - my)/3
 		mx -= (context.canvas.width - mx)/3
+	} else if (mx !== undefined) {
+		my -= 200
+		mx -= 20
 	}
 	const mouse = {x: mx, y: my}
 
@@ -200,8 +203,7 @@ const updatePainter = (context, painter, paths, colour) => {
 // PATH //
 //======//
 const drawPaths = (context, painter, paths) => {
-	//context.lineWidth = 250
-	context.lineWidth = 10
+	//context.lineWidth = 1
 	context.lineCap = "round"
 	for (let i = 0; i < paths.length; i++) {
 		let path = paths[i]
