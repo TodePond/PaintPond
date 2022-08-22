@@ -104,7 +104,7 @@ const getBrushPosition = (painter) => {
 
 let lastBrushWasTouch = false
 let restingPosition = [0, 0]
-on.mousemove(() => restingPosition = Mouse.position.map(v => v * devicePixelRatio / (window.shrinkScore)))
+on.mousemove(() => restingPosition = Mouse.position.map(v => v * 1 / (window.shrinkScore)))
 on.touchstart(e => e.preventDefault(), {passive: false})
 
 const updatePainter = (context, painter, paths, colour) => {
@@ -137,7 +137,7 @@ const updatePainter = (context, painter, paths, colour) => {
 	if (Touches.length > 0) {
 		lastBrushWasTouch = true
 		const [touch] = Touches
-		restingPosition = touch.position.map(v => v * devicePixelRatio / (window.shrinkScore))
+		restingPosition = touch.position.map(v => v * 1 / (window.shrinkScore))
 		;[mx, my] = restingPosition
 	}
 

@@ -25,7 +25,7 @@ const Show = {}
 
 			show.canvas = document.createElement("canvas")
 			show.canvas.style["background-color"] = Colour.Black
-			show.canvas.style["image-rendering"] = "pixelated"
+			//show.canvas.style["image-rendering"] = "pixelated"
 			document.body.appendChild(show.canvas)
 		}
 
@@ -35,18 +35,18 @@ const Show = {}
 		
 		const resize = () => {
 
-			show.canvas.width = Math.round(innerWidth * devicePixelRatio)
-			show.canvas.height = Math.round(innerHeight * devicePixelRatio)
+			show.canvas.width = (innerWidth * 1)
+			show.canvas.height = (innerHeight * 1)
 
 			window.shrinkScore = 1
-			if (show.canvas.width > 1920 || show.canvas.height > 1920) {
+			/*if (show.canvas.width > 1920 || show.canvas.height > 1920) {
 				window.shrinkScore++
 				show.canvas.width = Math.round(show.canvas.width / 2)
 				show.canvas.height = Math.round(show.canvas.height / 2)
-			}
+			}*/
 
-			show.canvas.style["width"] = Math.round(innerWidth)
-			show.canvas.style["height"] = Math.round(innerHeight)
+			show.canvas.style["width"] = (innerWidth)
+			show.canvas.style["height"] = (innerHeight)
 			
 			show.resize(show.context, show.canvas)
 		}
