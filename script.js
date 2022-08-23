@@ -194,7 +194,21 @@ const updatePainter = (context, painter, paths, colour) => {
 	
 	if (painter.isPainting) {
 		const path = paths.last
-		path.push([newBrush.x, newBrush.y])
+		const last = path.last
+		const secondLast = path[path.length - 2]
+		if (secondLast === undefined || last === undefined) {			
+			path.push([newBrush.x, newBrush.y])
+			return
+		}
+		const displacementLast = [newBrush.x - last[0], newBrush.y - last[1]]
+		const displacementSecondLast = [newBrush.x - secondLast[0], newBrush.y - secondLast[1]]
+		const distanceLast = Math.hypot(...displacementLast)
+		const distanceSecondLast = Math.hypot(...displacementSecondLast)
+		if (distanceSecondLast <= 5.0) {
+			path[path.length-1] = [newBrush.x, newBrush.y]
+		} else {
+			path.push([newBrush.x, newBrush.y])
+		}
 	}
 
 }
@@ -286,7 +300,7 @@ const berd = makePainter({
 	acceleration: 0.0002,
 	strokeOptions: {
 		smoothing: 1.0,
-		streamline: 0.6,
+		streamline: 0.5,
 		thinning: 0.5,
 		last: true,
 	},
