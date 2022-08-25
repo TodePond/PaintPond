@@ -226,12 +226,14 @@ const updatePainter = (svg, strokesContainer, painter, paths, colour) => {
 			path.element.setAttribute("d", getSvgPathFromStroke(stroke))
 			return
 		}
-		const displacementLast = [newBrush.x - last[0], newBrush.y - last[1]]
+		//const displacementLast = [newBrush.x - last[0], newBrush.y - last[1]]
 		const displacementSecondLast = [newBrush.x - secondLast[0], newBrush.y - secondLast[1]]
-		const distanceLast = Math.hypot(...displacementLast)
+		//const distanceLast = Math.hypot(...displacementLast)
 		const distanceSecondLast = Math.hypot(...displacementSecondLast)
 		if (distanceSecondLast <= 5.0) {
 			path[path.length-1] = [newBrush.x, newBrush.y]
+			const stroke = getStroke(path, painter.strokeOptions)
+			path.element.setAttribute("d", getSvgPathFromStroke(stroke))
 		} else {
 			path.push([newBrush.x, newBrush.y])
 			const stroke = getStroke(path, painter.strokeOptions)
