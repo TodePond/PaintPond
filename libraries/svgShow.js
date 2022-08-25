@@ -38,7 +38,7 @@ const Show = {}
 			show.svg.style["width"] = (innerWidth)
 			show.svg.style["height"] = (innerHeight)
 
-      show.svg.setAttributeNS("http://www.w3.org/2000/svg", 'viewBox', `0 0 ${innerWidth} ${innerHeight}`)
+			show.svg.setAttributeNS("http://www.w3.org/2000/svg", 'viewBox', `0 0 ${innerWidth} ${innerHeight}`)
 			
 			show.resize(show.svg)
 		}

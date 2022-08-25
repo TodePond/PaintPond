@@ -35,14 +35,14 @@ const makePainter = ({
 		const image = document.createElementNS("http://www.w3.org/2000/svg", "image")
 		image.setAttributeNS("http://www.w3.org/1999/xlink", "href", source)
 		image.style.visibility = "hidden"
-		return image;
+		return image
 	})
 
 	// A promise that awaits the loading of all resources before resolving.
 	const ready = Promise.all(images.map(async (image) => {
-		const img = new Image();
-		img.src = image.href.baseVal;
-		img.loading = "eager";
+		const img = new Image()
+		img.src = image.href.baseVal
+		img.loading = "eager"
 		if (!img.complete) {
 			await new Promise((resolve, reject) => {
 				img.addEventListener('load', resolve)
@@ -51,7 +51,7 @@ const makePainter = ({
 		}
 		image.setAttribute("width", img.width * scale)
 		image.setAttribute("height", img.height * scale)
-	}));
+	}))
 
 	const painter = {
 		images,
@@ -102,11 +102,11 @@ const drawPainter = (painter) => {
 
 // https://stackoverflow.com/questions/17410809/how-to-calculate-rotation-in-2d-in-javascript
 function rotatePoint (cx, cy, x, y, angle) {
-    const cos = Math.cos(-angle)
-    const sin = Math.sin(-angle)
-    const nx = (cos * (x - cx)) + (sin * (y - cy)) + cx
-    const ny = (cos * (y - cy)) - (sin * (x - cx)) + cy
-    return {x: nx, y: ny}
+	const cos = Math.cos(-angle)
+	const sin = Math.sin(-angle)
+	const nx = (cos * (x - cx)) + (sin * (y - cy)) + cx
+	const ny = (cos * (y - cy)) - (sin * (x - cx)) + cy
+	return {x: nx, y: ny}
 }
 
 const getBrushPosition = (painter) => {
@@ -246,19 +246,19 @@ const updatePainter = (svg, strokesContainer, painter, paths, colour) => {
 //======//
 
 function getSvgPathFromStroke(stroke) {
-  if (!stroke.length) return ''
+	if (!stroke.length) return ''
 
-  const d = stroke.reduce(
-    (acc, [x0, y0], i, arr) => {
-      const [x1, y1] = arr[(i + 1) % arr.length]
-      acc.push(x0, y0, (x0 + x1) / 2, (y0 + y1) / 2)
-      return acc
-    },
-    ['M', ...stroke[0], 'Q']
-  )
+	const d = stroke.reduce(
+		(acc, [x0, y0], i, arr) => {
+			const [x1, y1] = arr[(i + 1) % arr.length]
+			acc.push(x0, y0, (x0 + x1) / 2, (y0 + y1) / 2)
+			return acc
+		},
+		['M', ...stroke[0], 'Q']
+	)
 
-  d.push('Z')
-  return d.join(' ')
+	d.push('Z')
+	return d.join(' ')
 }
 
 //--------------------- NO GLOBAL STATE ABOVE THIS LINE ---------------------//
@@ -339,7 +339,7 @@ show.tick = (svg) => {
 	updatePainter(show.svg, global.strokesContainer, global.painter, global.paths, global.colour)
 	drawPainter(global.painter)
 	// Resume redraw of the SVG image
-	svg.unsuspendRedraw(suspendId);
+	svg.unsuspendRedraw(suspendId)
 }
 
 on.load(() => trigger("resize"))
@@ -354,7 +354,7 @@ const changePainter = (painter) => {
 			global.painterContainer.removeChild(el)
 		}
 	})
-	global.painter = painter;
+	global.painter = painter
 	global.painter.images.forEach((el) => {
 		el.style.visibility = "hidden"
 		global.painterContainer.appendChild(el)
@@ -363,12 +363,12 @@ const changePainter = (painter) => {
 }
 
 // Run it once at the start to trigger the initial painter
-changePainter(painters[0]);
+changePainter(painters[0])
 
 //=======//
 // EVENT //
 //=======//
-on.contextmenu(e => e.preventDefault(), {passive: false})
+on.contextmenu((e) => e.preventDefault(), {passive: false})
 
 const KEYDOWN = {}
 on.keydown(e => {
@@ -380,7 +380,7 @@ on.keydown(e => {
 KEYDOWN["x"] = () => {
 	const path = global.paths.pop()
 	if (path) {
-		path.element.remove();
+		path.element.remove()
 	}
 	if (global.painter.isPainting) {
 		global.painter.isPainting = false
@@ -388,6 +388,9 @@ KEYDOWN["x"] = () => {
 }
 
 KEYDOWN["r"] = () => {
+	global.paths.forEach((path) => {
+		path.element.remove()
+	})
 	global.paths = []
 	global.painter.isPainting = false
 }
