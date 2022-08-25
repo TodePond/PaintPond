@@ -125,7 +125,7 @@ let restingPosition = [0, 0]
 on.mousemove(() => restingPosition = Mouse.position.map(v => v * 1 / (window.shrinkScore)))
 on.touchstart(e => e.preventDefault(), {passive: false})
 
-const updatePainter = (svg, strokesContainer, painter, paths, colour) => {
+const updatePainter = (layers, strokeHistoryContainer, currentStrokeContainer, painter, paths, colour) => {
 	if (painter.isPainting) {
 		painter.idleFadePower -= 0.01
 	} else {
@@ -163,8 +163,8 @@ const updatePainter = (svg, strokesContainer, painter, paths, colour) => {
 	if (Mouse.Left) lastBrushWasTouch = false
 
 	if (!lastBrushWasTouch && mx !== undefined) {
-		my -= (svg.height.baseVal.value - my)/3
-		mx -= (svg.width.baseVal.value - mx)/3
+		my -= (layers.last.height.baseVal.value - my)/3
+		mx -= (layers.last.width.baseVal.value - mx)/3
 	} else if (mx !== undefined) {
 		my -= 200
 		mx -= 20
@@ -191,11 +191,12 @@ const updatePainter = (svg, strokesContainer, painter, paths, colour) => {
 				const stroke = getStroke(path, painter.strokeOptions)
 				element.setAttribute("d", getSvgPathFromStroke(stroke))
 				element.setAttribute("fill", path.colour)
-				strokesContainer.appendChild(element)
+				currentStrokeContainer.appendChild(element)
 			}
 		}
-	} else {
+	} else if (painter.isPainting) {
 		painter.isPainting = false
+		strokeHistoryContainer.appendChild(paths.last.element)
 	}
 
 	for (const position of ["x", "y"]) {
@@ -310,7 +311,7 @@ const painters = [berd, tode]
 //======//
 // SHOW //
 //======//
-const show = Show.make()
+const show = Show.make({ layerCount: 2 })
 
 //==============//
 // GLOBAL STATE //
@@ -321,8 +322,9 @@ const global = {
 	paths: [],
 	colour: Colour.White,
 	currentFrame: null,
-	strokesContainer: show.svg.appendChild(document.createElementNS("http://www.w3.org/2000/svg", "g")),
-	painterContainer: show.svg.appendChild(document.createElementNS("http://www.w3.org/2000/svg", "g")),
+	strokeHistoryContainer: show.layers.first.appendChild(document.createElementNS("http://www.w3.org/2000/svg", "g")),
+	currentStrokeContainer: show.layers.last.appendChild(document.createElementNS("http://www.w3.org/2000/svg", "g")),
+	painterContainer: show.layers.last.appendChild(document.createElementNS("http://www.w3.org/2000/svg", "g")),
 }
 
 window.global = global
@@ -330,18 +332,18 @@ window.global = global
 
 //const BLUE_SCREEN_COLOUR = Colour.multiply(Colour.Green, {lightness: 0.5})
 const BLUE_SCREEN_COLOUR = Colour.Black
-show.resize = (svg) => {
-	svg.style["background-color"] = BLUE_SCREEN_COLOUR
-	svg.style["cursor"] = "none"
+show.resize = (layers) => {
+	layers.first.style["background-color"] = BLUE_SCREEN_COLOUR
+	layers.forEach(layer => layer.style["cursor"] = "none")
 }
 
-show.tick = (svg) => {
+show.tick = (layers) => {
 	// Suspend redraw of the SVG image until all changes are made
-	const suspendId = svg.suspendRedraw(5000)
-	updatePainter(show.svg, global.strokesContainer, global.painter, global.paths, global.colour)
+	const suspendIds = layers.map(layer => [layer, layer.suspendRedraw(5000)])
+	updatePainter(layers, global.strokeHistoryContainer, global.currentStrokeContainer, global.painter, global.paths, global.colour)
 	drawPainter(global.painter)
 	// Resume redraw of the SVG image
-	svg.unsuspendRedraw(suspendId)
+	suspendIds.map(([layer, suspendId]) => layer.unsuspendRedraw(suspendId))
 }
 
 on.load(() => trigger("resize"))
