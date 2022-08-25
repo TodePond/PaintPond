@@ -31,12 +31,27 @@ const makePainter = ({
 	strokeOptions = {},
 } = {}) => {
 
-	const images = []
-	for (const source of sources) {
-		const image = new Image()
-		image.src = source
-		images.push(image)
-	}
+	const images = sources.map((source) => {
+		const image = document.createElementNS("http://www.w3.org/2000/svg", "image")
+		image.setAttributeNS("http://www.w3.org/1999/xlink", "href", source)
+		image.style.visibility = "hidden"
+		return image
+	})
+
+	// A promise that awaits the loading of all resources before resolving.
+	const ready = Promise.all(images.map(async (image) => {
+		const img = new Image()
+		img.src = image.href.baseVal
+		img.loading = "eager"
+		if (!img.complete) {
+			await new Promise((resolve, reject) => {
+				img.addEventListener('load', resolve)
+				img.addEventListener('error', reject)
+			})
+		}
+		image.setAttribute("width", img.width * scale)
+		image.setAttribute("height", img.height * scale)
+	}))
 
 	const painter = {
 		images,
@@ -66,39 +81,42 @@ const makePainter = ({
 		idleFadePower,
 		idleFrequency,
 		strokeOptions,
+		ready,
 	}
+
 	return painter
 }
 
-const drawPainter = (context, painter) => {
-	const {images, frame, scale, r} = painter
+const drawPainter = (painter) => {
+	const {images, frame, r} = painter
 	const image = images[frame]
-	const [width, height] = ["width", "height"].map(dimension => image[dimension] * scale)
+	const width = image.width.baseVal.value
+	const height = image.height.baseVal.value
+	const cx = painter.x + width * painter.centerX
+	const cy = painter.y + height * painter.centerY
 
-	const center = {x: painter.x + width * painter.centerX, y: painter.y + height * painter.centerY}
-
-	context.translate(center.x, center.y)
-	context.rotate(r)
-	context.drawImage(image, -width * painter.centerX, -height * painter.centerY, width, height)
-	context.rotate(-r)
-	context.translate(-center.x, -center.y)
+	image.setAttribute("x", cx - width/2)
+	image.setAttribute("y", cy - height/2)
+	image.setAttribute("transform", `rotate(${r * 180 / Math.PI}, ${cx}, ${cy})`)
 }
 
 // https://stackoverflow.com/questions/17410809/how-to-calculate-rotation-in-2d-in-javascript
 function rotatePoint (cx, cy, x, y, angle) {
-    const cos = Math.cos(-angle)
-    const sin = Math.sin(-angle)
-    const nx = (cos * (x - cx)) + (sin * (y - cy)) + cx
-    const ny = (cos * (y - cy)) - (sin * (x - cx)) + cy
-    return {x: nx, y: ny}
+	const cos = Math.cos(-angle)
+	const sin = Math.sin(-angle)
+	const nx = (cos * (x - cx)) + (sin * (y - cy)) + cx
+	const ny = (cos * (y - cy)) - (sin * (x - cx)) + cy
+	return {x: nx, y: ny}
 }
 
 const getBrushPosition = (painter) => {
 	const image = painter.images[painter.frame]
+	const width = image.width.baseVal.value
+	const height = image.height.baseVal.value
 	const x = painter.x - painter.offsetX * painter.scale
 	const y = painter.y - painter.offsetY * painter.scale
-	const cx = painter.x + image.width*painter.centerX * painter.scale
-	const cy = painter.y + image.height*painter.centerY * painter.scale
+	const cx = painter.x + width*painter.centerX
+	const cy = painter.y + height*painter.centerY
 	return rotatePoint(cx, cy, x, y, painter.r)
 }
 
@@ -107,8 +125,7 @@ let restingPosition = [0, 0]
 on.mousemove(() => restingPosition = Mouse.position.map(v => v * 1 / (window.shrinkScore)))
 on.touchstart(e => e.preventDefault(), {passive: false})
 
-const updatePainter = (context, painter, paths, colour) => {
-
+const updatePainter = (svg, strokesContainer, painter, paths, colour) => {
 	if (painter.isPainting) {
 		painter.idleFadePower -= 0.01
 	} else {
@@ -122,10 +139,12 @@ const updatePainter = (context, painter, paths, colour) => {
 		painter.age = 0
 	}
 	if (painter.age % (60 / painter.frameRate) === 0) {
+		painter.images[painter.frame].style.visibility = "hidden"
 		painter.frame++
 		if (painter.frame >= painter.images.length) {
 			painter.frame = 0
 		}
+		painter.images[painter.frame].style.visibility = "visible"
 	}
 
 	const acceleration = painter.acceleration * (Mouse.Right? -1 : 1)
@@ -144,8 +163,8 @@ const updatePainter = (context, painter, paths, colour) => {
 	if (Mouse.Left) lastBrushWasTouch = false
 
 	if (!lastBrushWasTouch && mx !== undefined) {
-		my -= (context.canvas.height - my)/3
-		mx -= (context.canvas.width - mx)/3
+		my -= (svg.height.baseVal.value - my)/3
+		mx -= (svg.width.baseVal.value - mx)/3
 	} else if (mx !== undefined) {
 		my -= 200
 		mx -= 20
@@ -154,7 +173,6 @@ const updatePainter = (context, painter, paths, colour) => {
 
 	if (Mouse.Left || Touches.length > 0) {
 		if (!painter.isPainting) {
-			
 			let isCloseEnough = true
 			if (Touches.length > 0) {
 				const displacement = [mx - painter.x, my - painter.y]
@@ -165,9 +183,15 @@ const updatePainter = (context, painter, paths, colour) => {
 			if (isCloseEnough) {
 				painter.isPainting = true
 				const path = []
+				const element = document.createElementNS("http://www.w3.org/2000/svg", "path")
+				path.element = element
 				paths.push(path)
 				path.colour = colour
 				path.push([brush.x, brush.y])
+				const stroke = getStroke(path, painter.strokeOptions)
+				element.setAttribute("d", getSvgPathFromStroke(stroke))
+				element.setAttribute("fill", path.colour)
+				strokesContainer.appendChild(element)
 			}
 		}
 	} else {
@@ -198,6 +222,8 @@ const updatePainter = (context, painter, paths, colour) => {
 		const secondLast = path[path.length - 2]
 		if (secondLast === undefined || last === undefined) {			
 			path.push([newBrush.x, newBrush.y])
+			const stroke = getStroke(path, painter.strokeOptions)
+			path.element.setAttribute("d", getSvgPathFromStroke(stroke))
 			return
 		}
 		const displacementLast = [newBrush.x - last[0], newBrush.y - last[1]]
@@ -208,6 +234,8 @@ const updatePainter = (context, painter, paths, colour) => {
 			path[path.length-1] = [newBrush.x, newBrush.y]
 		} else {
 			path.push([newBrush.x, newBrush.y])
+			const stroke = getStroke(path, painter.strokeOptions)
+			path.element.setAttribute("d", getSvgPathFromStroke(stroke))
 		}
 	}
 
@@ -216,68 +244,21 @@ const updatePainter = (context, painter, paths, colour) => {
 //======//
 // PATH //
 //======//
-const drawPaths = (context, painter, paths) => {
-	//context.lineWidth = 1
-	context.lineCap = "round"
-	for (let i = 0; i < paths.length; i++) {
-		let path = paths[i]
 
-		if (!(path instanceof Path2D)) {
-			const stroke = getStroke(path, painter.strokeOptions)
-			const [head, ...tail] = getSmootherStroke(stroke, 3)
+function getSvgPathFromStroke(stroke) {
+	if (!stroke.length) return ''
 
-			const strokePath = new Path2D()
-			if (!painter.isPainting || path !== paths.last) {
-				paths[i] = strokePath
-			}
+	const d = stroke.reduce(
+		(acc, [x0, y0], i, arr) => {
+			const [x1, y1] = arr[(i + 1) % arr.length]
+			acc.push(x0, y0, (x0 + x1) / 2, (y0 + y1) / 2)
+			return acc
+		},
+		['M', ...stroke[0], 'Q']
+	)
 
-			strokePath.moveTo(...head)
-			for (const [x, y] of tail) {
-				strokePath.lineTo(x, y)
-			}
-			
-			strokePath.colour = path.colour
-			path = strokePath
-		}
-
-		//context.strokeStyle = path.colour
-		//context.stroke(path)
-
-		context.fillStyle = path.colour
-		context.fill(path)
-	}
-}
-
-const getSmootherStroke = (stroke, iterations = 1) => {
-	const [head] = stroke
-	const smootherStroke = [head]
-	for (let i = 1; i < stroke.length; i++) {
-
-		let previous = stroke[i-1]
-		const point = stroke[i]
-		let next = stroke[i+1]
-		
-		if (previous === undefined) previous = point
-		if (next === undefined) next = point
-
-		const [px, py] = previous
-		const [x, y] = point
-		const [nx, ny] = next
-
-		const points = [
-			[px*3+x*2+nx, py*3+y*2+ny].map(v => v/6),
-			[px+x+nx, py+y+ny].map(v => v/3),
-			[px+x*2+nx*3, py+y*2+ny*3].map(v => v/6),
-
-		]
-		
-		smootherStroke.push(...points)
-	}
-
-	iterations--
-	if (iterations > 0) return getSmootherStroke(smootherStroke, iterations)
-
-	return smootherStroke
+	d.push('Z')
+	return d.join(' ')
 }
 
 //--------------------- NO GLOBAL STATE ABOVE THIS LINE ---------------------//
@@ -290,8 +271,8 @@ const berd = makePainter({
 	scale: 0.5,
 	centerY: 0.35,
 	centerX: 0.55,
-	offsetX: -25,
-	offsetY: -107.5,
+	offsetX: -55,
+	offsetY: -66.5,
 	speed: 0.1,
 	minSpeed: 0.035,
 	maxSpeed: 0.2,
@@ -311,8 +292,8 @@ const tode = makePainter({
 	scale: 0.5,
 	centerY: 0.35,
 	centerX: 0.55,
-	offsetX: -0,
-	offsetY: -70,
+	offsetX: -25,
+	offsetY: -20,
 	speed: 0.09,
 	minSpeed: 0.01,
 	maxSpeed: 0.15,
@@ -324,6 +305,11 @@ const tode = makePainter({
 
 const painters = [berd, tode]
 
+//======//
+// SHOW //
+//======//
+const show = Show.make()
+
 //==============//
 // GLOBAL STATE //
 //==============//
@@ -332,36 +318,57 @@ const global = {
 	painter: painters[0],
 	paths: [],
 	colour: Colour.White,
+	currentFrame: null,
+	strokesContainer: show.svg.appendChild(document.createElementNS("http://www.w3.org/2000/svg", "g")),
+	painterContainer: show.svg.appendChild(document.createElementNS("http://www.w3.org/2000/svg", "g")),
 }
 
 window.global = global
 
-//======//
-// SHOW //
-//======//
-const show = Show.make()
 
 //const BLUE_SCREEN_COLOUR = Colour.multiply(Colour.Green, {lightness: 0.5})
 const BLUE_SCREEN_COLOUR = Colour.Black
-show.resize = (context) => {
-	context.canvas.style["background-color"] = BLUE_SCREEN_COLOUR
-	context.canvas.style["cursor"] = "none"
+show.resize = (svg) => {
+	svg.style["background-color"] = BLUE_SCREEN_COLOUR
+	svg.style["cursor"] = "none"
 }
 
-show.tick = (context) => {
-	const {canvas} = context
-	context.clearRect(0, 0, canvas.width, canvas.height)
-	updatePainter(context, global.painter, global.paths, global.colour)
-	drawPaths(context, global.painter, global.paths)
-	drawPainter(context, global.painter)
+show.tick = (svg) => {
+	// Suspend redraw of the SVG image until all changes are made
+	const suspendId = svg.suspendRedraw(5000)
+	updatePainter(show.svg, global.strokesContainer, global.painter, global.paths, global.colour)
+	drawPainter(global.painter)
+	// Resume redraw of the SVG image
+	svg.unsuspendRedraw(suspendId)
 }
 
 on.load(() => trigger("resize"))
 
+//================//
+// CHANGE PAINTER //
+//================//
+
+const changePainter = (painter) => {
+	global.painter.images.forEach((el) => {
+		if (el.parentNode != null) {
+			global.painterContainer.removeChild(el)
+		}
+	})
+	global.painter = painter
+	global.painter.images.forEach((el) => {
+		el.style.visibility = "hidden"
+		global.painterContainer.appendChild(el)
+	})
+	global.painter.images[global.painter.frame].style.visibility = "hidden"
+}
+
+// Run it once at the start to trigger the initial painter
+changePainter(painters[0])
+
 //=======//
 // EVENT //
 //=======//
-on.contextmenu(e => e.preventDefault(), {passive: false})
+on.contextmenu((e) => e.preventDefault(), {passive: false})
 
 const KEYDOWN = {}
 on.keydown(e => {
@@ -371,13 +378,19 @@ on.keydown(e => {
 })
 
 KEYDOWN["x"] = () => {
-	global.paths.pop()
+	const path = global.paths.pop()
+	if (path) {
+		path.element.remove()
+	}
 	if (global.painter.isPainting) {
 		global.painter.isPainting = false
 	}
 }
 
 KEYDOWN["r"] = () => {
+	global.paths.forEach((path) => {
+		path.element.remove()
+	})
 	global.paths = []
 	global.painter.isPainting = false
 }
@@ -400,6 +413,6 @@ KEYDOWN["Tab"] = (e) => {
 	if (global.painterId >= painters.length) {
 		global.painterId = 0
 	}
-	global.painter = painters[global.painterId]
+	changePainter(painters[global.painterId])
 	e.preventDefault()
 }
