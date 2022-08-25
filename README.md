@@ -1,5 +1,5 @@
 # PaintPond
-Paint with a painter. This is something I made for this video: [youtu.be/WMJ1H3Ai-qs](https://youtu.be/WMJ1H3Ai-qs)
+Paint with a painter. This is something I made for this video: ✨ **[NEW Cellular Automata](https://youtu.be/WMJ1H3Ai-qs)**
 
 Try it at [paintpond.cool](https://paintpond.cool)!
 
