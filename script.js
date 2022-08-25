@@ -115,8 +115,8 @@ const getBrushPosition = (painter) => {
 	const height = image.height.baseVal.value
 	const x = painter.x - painter.offsetX * painter.scale
 	const y = painter.y - painter.offsetY * painter.scale
-	const cx = painter.x + width*painter.centerX * painter.scale
-	const cy = painter.y + height*painter.centerY * painter.scale
+	const cx = painter.x + width*painter.centerX
+	const cy = painter.y + height*painter.centerY
 	return rotatePoint(cx, cy, x, y, painter.r)
 }
 
@@ -271,8 +271,8 @@ const berd = makePainter({
 	scale: 0.5,
 	centerY: 0.35,
 	centerX: 0.55,
-	offsetX: -25,
-	offsetY: -107.5,
+	offsetX: -55,
+	offsetY: -66.5,
 	speed: 0.1,
 	minSpeed: 0.035,
 	maxSpeed: 0.2,
@@ -292,8 +292,8 @@ const tode = makePainter({
 	scale: 0.5,
 	centerY: 0.35,
 	centerX: 0.55,
-	offsetX: -0,
-	offsetY: -70,
+	offsetX: -25,
+	offsetY: -20,
 	speed: 0.09,
 	minSpeed: 0.01,
 	maxSpeed: 0.15,
