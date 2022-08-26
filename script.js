@@ -153,9 +153,9 @@ const updatePainter = (layers, strokeHistoryContainer, currentStrokeContainer, p
 	const brush = getBrushPosition(painter)
 
 	let [mx, my] = restingPosition
-	if (Touches.length > 0) {
+	const touch = Touches.first
+	if (touch) {
 		lastBrushWasTouch = true
-		const [touch] = Touches
 		restingPosition = touch.position.map(v => v * 1 / (window.shrinkScore))
 		;[mx, my] = restingPosition
 	}
@@ -171,10 +171,10 @@ const updatePainter = (layers, strokeHistoryContainer, currentStrokeContainer, p
 	}
 	const mouse = {x: mx, y: my}
 
-	if (Mouse.Left || Touches.length > 0) {
+	if (Mouse.Left || touch) {
 		if (!painter.isPainting) {
 			let isCloseEnough = true
-			if (Touches.length > 0) {
+			if (touch) {
 				const displacement = [mx - painter.x, my - painter.y]
 				const distance = Math.hypot(...displacement)
 				if (distance > 50) isCloseEnough = false
