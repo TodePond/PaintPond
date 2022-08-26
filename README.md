@@ -1,9 +1,11 @@
 # PaintPond
-Paint with a painter. This is something I made for this video: ✨ **[NEW Cellular Automata](https://youtu.be/WMJ1H3Ai-qs)**
+Paint with a painter.<br>
+I originally made PaintPond for this video: ✨ **[NEW Cellular Automata](https://youtu.be/WMJ1H3Ai-qs)**<br>
+It's also going to be used in my next one: 🔮 **Spellular Automata**
 
 Try it at [paintpond.cool](https://paintpond.cool)!
 
-# Controls
+## Controls
 **Number keys**: Change colour!<br>
 **Tab key**: Change painter!<br>
 **Space bar**: Enter [screenshot mode](docs/screenshot-mode.md)!
