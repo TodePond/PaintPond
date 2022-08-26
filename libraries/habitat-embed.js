@@ -1069,31 +1069,16 @@ Habitat.install = (global) => {
 //=======//
 {
 
-	const Touches = Habitat.Touches = []
-	
-	const trim = (a) => {
-		if (a.length == 0) return a
-		let start = a.length - 1
-		let end = 0
-		for (let i = 0; i < a.length; i++) {
-			const value = a[i]
-			if (value !== undefined) {
-				start = i
-				break
-			}
-		}
-		for (let i = a.length - 1; i >= 0; i--) {
-			const value = a[i]
-			if (value !== undefined) {
-				end = i + 1
-				break
-			}
-		}
-		a.splice(end)
-		a.splice(0, start)
-		return a
-	}
-	
+	const Touches = Habitat.Touches = new Map()
+	Reflect.defineProperty(Touches, 'first', {
+		get() {
+			return this.values().next().value
+		},
+		enumerable: true,
+		configurable: true,
+	})
+
+
 	Reflect.defineProperty(Touches, "install", {
 		value(global) {
 			
@@ -1103,8 +1088,8 @@ Habitat.install = (global) => {
 					const x = changedTouch.clientX
 					const y = changedTouch.clientY
 					const id = changedTouch.identifier
-					if (Touches[id] === undefined) Touches[id] = {position: [undefined, undefined]}
-					const touch = Touches[id]
+					if (!Touches.has(id)) Touches.set(id, {position: [undefined, undefined]})
+					const touch = Touches.get(id)
 					touch.position[0] = x
 					touch.position[1] = y
 				}
@@ -1116,10 +1101,10 @@ Habitat.install = (global) => {
 						const x = changedTouch.clientX
 						const y = changedTouch.clientY
 						const id = changedTouch.identifier
-						let touch = Touches[id]
+						let touch = Touches.get(id)
 						if (touch == undefined) {
 							touch = {position: [undefined, undefined]}
-							Touches[id] = touch
+							Touches.set(id, touch)
 						}
 						
 						touch.position[0] = x
@@ -1134,9 +1119,8 @@ Habitat.install = (global) => {
 			global.addEventListener("touchend", e => {
 				for (const changedTouch of e.changedTouches) {
 					const id = changedTouch.identifier
-					Touches[id] = undefined
+					Touches.delete(id)
 				}
-				trim(Touches)
 			})
 			
 			Reflect.defineProperty(Touches, "installed", {
