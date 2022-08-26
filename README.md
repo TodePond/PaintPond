@@ -3,20 +3,13 @@ Paint with a painter. This is something I made for this video: ✨ **[NEW Cellul
 
 Try it at [paintpond.cool](https://paintpond.cool)!
 
-Move the mouse to move the painter.<br>
-Left-click to paint<br>
-Press the 1 key for white!<br>
-Press the 2 key for red!<br>
-Press the 3 key for etc...
+# Controls
+**Number keys**: Change colour!<br>
+**Tab key**: Change painter!<br>
+**Space bar**: Enter [screenshot mode](docs/screenshot-mode.md)!
 
-Press X to undo!<br>
-Press C to clear the screen!<br>
-Press tab to change characters!<br>
-
-Press space to pause the paint program.<br>
-When paused, you can right/left click to copy the image to your clipboard.<br>
-Left click copies what you see, right click copies a version with transparent background<br>
-Click and drag to copy a region, just click to copy the entire canvas
+**X key**: Undo!<br>
+**C key**: Clear the screen!<br>
 
 ## Running Locally
 To run locally...<br>
