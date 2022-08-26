@@ -11,7 +11,12 @@ Press the 3 key for etc...
 
 Press X to undo!<br>
 Press C to clear the screen!<br>
-Press tab to change characters!
+Press tab to change characters!<br>
+
+Press space to pause the paint program.<br>
+When paused, you can right/left click to copy the image to your clipboard.<br>
+Left click copies what you see, right click copies a version with transparent background<br>
+Click and drag to copy a region, just click to copy the entire canvas
 
 ## Running Locally
 To run locally...<br>
