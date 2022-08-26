@@ -31,27 +31,39 @@ const makePainter = ({
 	strokeOptions = {},
 } = {}) => {
 
-	const images = sources.map((source) => {
+	const images = sources.map(() => {
 		const image = document.createElementNS("http://www.w3.org/2000/svg", "image")
-		image.setAttributeNS("http://www.w3.org/1999/xlink", "href", source)
 		image.style.visibility = "hidden"
 		return image
 	})
 
-	// A promise that awaits the loading of all resources before resolving.
-	const ready = Promise.all(images.map(async (image) => {
-		const img = new Image()
-		img.src = image.href.baseVal
-		img.loading = "eager"
-		if (!img.complete) {
-			await new Promise((resolve, reject) => {
-				img.addEventListener('load', resolve)
-				img.addEventListener('error', reject)
-			})
-		}
-		image.setAttribute("width", img.width * scale)
-		image.setAttribute("height", img.height * scale)
-	}))
+	const ready = (async () => {
+		const c = document.createElement("canvas");
+		const ctx = c.getContext("2d");
+
+		// A promise that awaits the loading of all resources before resolving.
+		await Promise.all(sources.map(async (src, i) => {
+			const img = new Image()
+			img.crossOrigin = ""
+			img.src = src
+			img.loading = "eager"
+			if (!img.complete) {
+				await new Promise((resolve, reject) => {
+					img.addEventListener('load', () => {
+						c.width = img.naturalWidth;     // update canvas size to match image
+						c.height = img.naturalHeight;
+						ctx.drawImage(img, 0, 0);       // draw in image
+						const image = images[i]
+						image.setAttribute("width", img.width * scale)
+						image.setAttribute("height", img.height * scale)
+						image.setAttribute('href', c.toDataURL()) // update image with new data
+						resolve()
+					})
+					img.addEventListener('error', reject)
+				})
+			}
+		}))
+	})()
 
 	const painter = {
 		images,
@@ -313,6 +325,146 @@ const painters = [berd, tode]
 //======//
 const show = Show.make({ layerCount: 2 })
 
+
+//==============//
+// Picture Mode //
+//==============//
+
+const pictureMode = (() => {
+	let listeners = null;
+	let viewBoxX, viewBoxY, viewBoxW, viewBoxH;
+	const dragLayer = document.createElementNS("http://www.w3.org/2000/svg", "svg")
+	const dragPath = document.createElementNS("http://www.w3.org/2000/svg", "path")
+	dragLayer.style.cursor = 'crosshair'
+	dragPath.setAttribute("fill", "#00000055")
+
+	function renderToCanvas(transparentBg, { x, y, w, h }) {
+		const canvas = document.createElement("canvas")
+		canvas.width = w
+		canvas.height = h
+		const ctx = canvas.getContext("2d")
+		ctx.clearRect(0, 0, w, h)
+		const layers = show.layers
+		return Promise.all(
+			layers.map((layer, i) => {
+				layer = layer.cloneNode(true);
+				layer.setAttribute("xmlns", "http://www.w3.org/2000/svg")
+				if (i === 0 && transparentBg) {
+					layer.style['background-color'] = 'transparent'
+				}
+				const outerHTML = layer.outerHTML;
+				const blob = new Blob([outerHTML], {type:'image/svg+xml;charset=utf-8'});
+				const URL = window.URL || window.webkitURL || window;
+				const blobURL = URL.createObjectURL(blob);
+				const img = new Image();
+				img.width = viewBoxW;
+				img.height = viewBoxH;
+				return new Promise((resolve, reject) => {
+					img.src = blobURL;
+					img.onload = () => resolve(img)
+					img.onerror = reject
+				})
+			})
+		).then(images => {
+			images.forEach(img => ctx.drawImage(img, -x, -y, viewBoxW, viewBoxH))
+		}).then(() => canvas)
+	}
+
+	const pm = {
+		start(layers) {
+			if (listeners) return
+			Array.prototype.filter.call(layers.last.style, key => key != 'cursor').forEach(key => dragLayer.style[key] = layers.last.style[key]);
+			[viewBoxX, viewBoxY, viewBoxW, viewBoxH] = layers.last.getAttributeNS("http://www.w3.org/2000/svg", "viewBox").split(" ").filter(x => x != "")
+			dragLayer.setAttributeNS("http://www.w3.org/2000/svg", "viewBox", `${viewBoxX} ${viewBoxY} ${viewBoxW} ${viewBoxH}`)
+			let dragStart = null;
+			let isDragging = false;
+			let isRightClick = false;
+			layers.last.insertAdjacentElement("afterend", dragLayer)
+			listeners = [
+				on.mousedown((e) => {
+					// We need focus in order to have permission
+					// to modify the clipboard.
+					// On certain OS'es, focus is granted after
+					// mouseup is fired
+					if (dragStart || !document.hasFocus()) {
+						isDragging = false
+						dragStart = null
+						dragPath.remove()
+						return
+					}
+					isRightClick = e.button === 2
+					dragStart = [e.clientX, e.clientY]
+					isDragging = false
+				}),
+				on.mousemove((e) => {
+					if (dragStart && !isDragging) {
+						isDragging = true
+						dragLayer.appendChild(dragPath)
+					}
+					if (isDragging) {
+						const [x0, y0] = dragStart
+						const [x1, y1] = [e.clientX, e.clientY]
+						const minX = Math.min(x0, x1)
+						const minY = Math.min(y0, y1)
+						const maxX = Math.max(x0, x1)
+						const maxY = Math.max(y0, y1)
+						dragPath.setAttribute("d", `M0,0L${viewBoxW},0 ${viewBoxW},${viewBoxH} 0,${viewBoxH}M${minX},${minY}L${minX},${maxY} ${maxX},${maxY} ${maxX},${minY}Z`)
+					}
+				}),
+				on.mouseup((e) => {
+					if (!dragStart) return
+					const canvas = document.createElement("canvas")
+					canvas.width = viewBoxW
+					canvas.height = viewBoxH
+					let canvasPromise
+					if (isDragging) {
+						const from = dragStart;
+						const to = [e.clientX, e.clientY];
+						const minX = Math.min(from[0], to[0]);
+						const minY = Math.min(from[1], to[1]);
+						const maxX = Math.max(from[0], to[0]);
+						const maxY = Math.max(from[1], to[1]);
+						dragPath.remove()
+						canvasPromise =  renderToCanvas(isRightClick, {
+							x: minX,
+							y: minY,
+							w: maxX - minX,
+							h: maxY - minY
+						});
+					} else {
+						canvasPromise = renderToCanvas(isRightClick, {
+							x: 0,
+							y: 0,
+							w: viewBoxW,
+							h: viewBoxH,
+						});
+					}
+					navigator.clipboard.write([
+						new ClipboardItem({
+							"image/png": canvasPromise.then(canvas => new Promise(resolve => canvas.toBlob(resolve))),
+						})
+					]).catch(console.error)
+					dragStart = null
+					isDragging = false
+				}),
+			]
+		},
+		resize(layers) {
+			Array.prototype.filter.call(layers.last.style, key => key != 'cursor').forEach(key => dragLayer.style[key] = layers.last.style[key]);
+			[viewBoxX, viewBoxY, viewBoxW, viewBoxH] = layers.last.getAttributeNS("http://www.w3.org/2000/svg", "viewBox").split(" ").filter(x => x != "")
+			dragLayer.setAttributeNS("http://www.w3.org/2000/svg", "viewBox", `${viewBoxX} ${viewBoxY} ${viewBoxW} ${viewBoxH}`)
+		},
+		stop() {
+			if (!listeners) return
+			listeners.forEach(off => off())
+			listeners = null
+			dragLayer.remove()
+		}
+	}
+
+	return pm
+})()
+
 //==============//
 // GLOBAL STATE //
 //==============//
@@ -335,6 +487,7 @@ const BLUE_SCREEN_COLOUR = Colour.Black
 show.resize = (layers) => {
 	layers.first.style["background-color"] = BLUE_SCREEN_COLOUR
 	layers.forEach(layer => layer.style["cursor"] = "none")
+	pictureMode.resize(layers)
 }
 
 show.tick = (layers) => {
@@ -344,6 +497,14 @@ show.tick = (layers) => {
 	drawPainter(global.painter)
 	// Resume redraw of the SVG image
 	suspendIds.map(([layer, suspendId]) => layer.unsuspendRedraw(suspendId))
+}
+
+show.pause = (paused, layers) => {
+	if (paused) {
+		pictureMode.start(layers)
+	} else {
+		pictureMode.stop()
+	}	
 }
 
 on.load(() => trigger("resize"))

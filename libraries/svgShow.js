@@ -2,7 +2,7 @@ const Show = {}
 
 {
 
-	Show.make = ({layers, container, paused = false, scale = 1.0, aspect, speed = 1.0, resize = () => {}, tick = () => {}, supertick = () => {}, layerCount = 1} = {}) => {
+	Show.make = ({layers, container, paused = false, scale = 1.0, aspect, speed = 1.0, resize = () => {}, tick = () => {}, supertick = () => {}, layerCount = 1} = {}, pause = () => {}) => {
 		if (layers !== undefined) {
 			layerCount = layers.length;
 		}
@@ -71,7 +71,10 @@ const Show = {}
 
 		addEventListener("resize", resize)
 		addEventListener("keydown", (e) => {
-			if (e.key === " ") show.paused = !show.paused
+			if (e.key === " ") {
+				show.paused = !show.paused
+				show.pause(show.paused, show.layers)
+			}
 		})
 		
 		resize()

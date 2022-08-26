@@ -488,7 +488,10 @@ const Habitat = {}
 		Reflect.defineProperty(global.EventTarget.prototype, "on", {
 			get() {
 				return new Proxy(this, {
-					get: (element, eventName) => (...args) => element.addEventListener(eventName, ...args),
+					get: (element, eventName) => (...args) => {
+						element.addEventListener(eventName, ...args)
+						return () => element.removeEventListener(eventName, ...args)
+					},
 				})
 			},
 			set(value) {
