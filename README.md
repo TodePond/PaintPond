@@ -29,6 +29,6 @@ file_server
 ```
 
 ## Special Thanks
-* [Magnogen](https://magnogen.net/) for giving berd some more life + movement
+* [Magnogen](https://magnogen.net/) for giving the characters more life + movement
 * [Steve Ruiz](https://www.steveruiz.me/) for making [Perfect Freehand](https://github.com/steveruizok/perfect-freehand) (which this project uses)
 * [Linn Dahlgreen](https://github.com/SimplyLinn) for improving the stroke rendering, and getting it to work on iPhones
