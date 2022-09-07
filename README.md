@@ -1,3 +1,5 @@
+<img align="right" height="100" src="https://user-images.githubusercontent.com/15892272/188943551-95ba41cd-3db7-436e-bdb2-d0192711851f.png">
+
 # PaintPond
 Paint with a painter.<br>
 I originally made PaintPond for this video: ✨ **[NEW Cellular Automata](https://youtu.be/WMJ1H3Ai-qs)**<br>
