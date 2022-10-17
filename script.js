@@ -305,7 +305,44 @@ const tode = makePainter({
 	strokeOptions: berd.strokeOptions,
 })
 
-const painters = [berd, tode]
+const todeWitch = makePainter({
+	sources: ["images/hat/tode.png"],
+	scale: 0.25,
+	centerY: 0.1,
+	centerX: 0.525,
+	offsetX: -35,
+	offsetY: -17.5,
+	speed: 0.09,
+	minSpeed: 0.01,
+	maxSpeed: 0.15,
+	dr: 0.05,
+	speedR: 0.05,
+	acceleration: 0.00001,
+	strokeOptions: berd.strokeOptions,
+})
+
+const berdWitch = makePainter({
+	sources: ["images/hat/berd0.png", "images/hat/berd1.png"],
+	scale: 0.5,
+	centerY: 0.1,
+	centerX: 0.55,
+	offsetX: -47,
+	offsetY: -60,
+	speed: 0.1,
+	minSpeed: 0.035,
+	maxSpeed: 0.2,
+	dr: 0.05,
+	speedR: 0.1,
+	acceleration: 0.0002,
+	strokeOptions: {
+		smoothing: 1.0,
+		streamline: 0.5,
+		thinning: 0.5,
+		last: true,
+	},
+})
+
+const painters = [berdWitch, todeWitch]
 
 //======//
 // SHOW //
