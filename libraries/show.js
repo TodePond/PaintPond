@@ -1,8 +1,8 @@
-const Show = {}
+const CanvasShow = {}
 
 {
 
-	Show.make = ({canvas, context, paused = false, scale = 1.0, aspect, speed = 1.0, resize = () => {}, tick = () => {}, supertick = () => {}} = {}) => {
+	CanvasShow.make = ({canvas, context, paused = false, scale = 1.0, aspect, speed = 1.0, resize = () => {}, tick = () => {}, supertick = () => {}} = {}) => {
 		
 		const show = {canvas, context, paused, scale, speed, resize, tick, supertick}
 

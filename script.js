@@ -1,12 +1,21 @@
 import { getStroke, getStrokeOutlinePoints } from "./libraries/perfect-freehand.js"
 
-//========//
-// USEFUL //
-//========//
+//===========//
+// UTILITIES //
+//===========//
 const clamp = (n, min, max) => {
 	if (n < min) return min
 	if (n > max) return max
 	return n
+}
+
+// https://stackoverflow.com/questions/17410809/how-to-calculate-rotation-in-2d-in-javascript
+function rotatePoint (cx, cy, x, y, angle) {
+	const cos = Math.cos(-angle)
+	const sin = Math.sin(-angle)
+	const nx = (cos * (x - cx)) + (sin * (y - cy)) + cx
+	const ny = (cos * (y - cy)) - (sin * (x - cx)) + cy
+	return {x: nx, y: ny}
 }
 
 //=========//
@@ -110,15 +119,6 @@ const drawPainter = (painter) => {
 	image.setAttribute("x", cx - width/2)
 	image.setAttribute("y", cy - height/2)
 	image.setAttribute("transform", `rotate(${r * 180 / Math.PI}, ${cx}, ${cy})`)
-}
-
-// https://stackoverflow.com/questions/17410809/how-to-calculate-rotation-in-2d-in-javascript
-function rotatePoint (cx, cy, x, y, angle) {
-	const cos = Math.cos(-angle)
-	const sin = Math.sin(-angle)
-	const nx = (cos * (x - cx)) + (sin * (y - cy)) + cx
-	const ny = (cos * (y - cy)) - (sin * (x - cx)) + cy
-	return {x: nx, y: ny}
 }
 
 const getBrushPosition = (painter) => {
@@ -259,7 +259,6 @@ const updatePainter = (layers, strokeHistoryContainer, currentStrokeContainer, p
 //======//
 // PATH //
 //======//
-
 function getSvgPathFromStroke(stroke) {
 	if (!stroke.length) return ''
 
@@ -361,12 +360,41 @@ const painters = [berdWitch, todeWitch]
 // SHOW //
 //======//
 const show = Show.make({ layerCount: 2 })
-
+const undershow = CanvasShow.make()
 
 //==============//
-// Picture Mode //
+// GREEN SCREEN //
 //==============//
+const GREEN_SCREEN_COLOUR = Colour.multiply(Colour.Green, {lightness: 0.5})
+const PLATE_DIMENSIONS = [4400, 2253]
+const PLATE_SCALED_DIMENSIONS = PLATE_DIMENSIONS.map(v => v * 0.3)
 
+undershow.tick = (context) => {
+	const {canvas} = context
+	const {width, height} = canvas
+
+	if (global.greenScreenEnabled) {
+
+		context.fillStyle = GREEN_SCREEN_COLOUR
+		context.fillRect(0, 0, canvas.width, canvas.height)
+
+		if (!global.fullGreenScreenEnabled) {
+			const [plateWidth, plateHeight] = PLATE_SCALED_DIMENSIONS
+			const margin = [width - plateWidth, height - plateHeight]
+			const [mx, my] = margin
+			context.fillStyle = Colour.Black
+			context.fillRect(mx/2, my/2, ...PLATE_SCALED_DIMENSIONS)
+		}
+
+	} else {
+		context.fillStyle = Colour.Black
+		context.fillRect(0, 0, canvas.width, canvas.height)
+	}
+}
+
+//==============//
+// PICTURE MODE //
+//==============//
 const pictureMode = (() => {
 	let listeners = null;
 	let viewBoxX, viewBoxY, viewBoxW, viewBoxH;
@@ -514,15 +542,13 @@ const global = {
 	strokeHistoryContainer: show.layers.first.appendChild(document.createElementNS("http://www.w3.org/2000/svg", "g")),
 	currentStrokeContainer: show.layers.last.appendChild(document.createElementNS("http://www.w3.org/2000/svg", "g")),
 	painterContainer: show.layers.last.appendChild(document.createElementNS("http://www.w3.org/2000/svg", "g")),
+	greenScreenEnabled: false,
+	fullGreenScreenEnabled: false,
 }
 
 window.global = global
 
-
-//const BLUE_SCREEN_COLOUR = Colour.multiply(Colour.Green, {lightness: 0.5})
-const BLUE_SCREEN_COLOUR = Colour.Black
 show.resize = (layers) => {
-	layers.first.style["background-color"] = BLUE_SCREEN_COLOUR
 	layers.forEach(layer => layer.style["cursor"] = "none")
 	pictureMode.resize(layers)
 }
@@ -549,7 +575,6 @@ on.load(() => trigger("resize"))
 //================//
 // CHANGE PAINTER //
 //================//
-
 const changePainter = (painter) => {
 	global.painter.images.forEach((el) => {
 		if (el.parentNode != null) {
@@ -618,3 +643,6 @@ KEYDOWN["Tab"] = (e) => {
 	changePainter(painters[global.painterId])
 	e.preventDefault()
 }
+
+KEYDOWN["g"] = () => global.greenScreenEnabled = !global.greenScreenEnabled
+KEYDOWN["f"] = () => global.fullGreenScreenEnabled = !global.fullGreenScreenEnabled

@@ -34,7 +34,7 @@ const Show = {}
 				show.layers[i].style["position"] = "absolute"
 				document.body.appendChild(show.layers[i])
 			}
-			show.layers[0].style["background-color"] = Colour.Black
+			//show.layers[0].style["background-color"] = Colour.Black
 		}
 		
 		show.layers.first = show.layers[0]
