@@ -367,11 +367,22 @@ const undershow = CanvasShow.make()
 //==============//
 const GREEN_SCREEN_COLOUR = Colour.multiply(Colour.Blue, {lightness: 0.25})
 const PLATE_DIMENSIONS = [4400, 2253]
-const PLATE_SCALED_DIMENSIONS = PLATE_DIMENSIONS.map(v => v * 0.3)
+//const PLATE_DIMENSIONS = [2200 + 33.92, 2253]
+const PLATE_SCALED_DIMENSIONS = PLATE_DIMENSIONS.map(v => v * 0.32).d
 
 undershow.tick = (context) => {
 	const {canvas} = context
 	const {width, height} = canvas
+
+	const [plateWidth, plateHeight] = PLATE_SCALED_DIMENSIONS
+	const margin = [width - plateWidth, height - plateHeight]
+	const [mx, my] = margin
+	const plate = {
+		x: mx/2,
+		y: my/2,
+		width: plateWidth,
+		height: plateHeight,
+	}
 
 	if (global.greenScreenEnabled) {
 
@@ -379,9 +390,6 @@ undershow.tick = (context) => {
 		context.fillRect(0, 0, canvas.width, canvas.height)
 
 		if (!global.fullGreenScreenEnabled) {
-			const [plateWidth, plateHeight] = PLATE_SCALED_DIMENSIONS
-			const margin = [width - plateWidth, height - plateHeight]
-			const [mx, my] = margin
 			context.fillStyle = Colour.Black
 			context.fillRect(mx/2, my/2, ...PLATE_SCALED_DIMENSIONS)
 		}
@@ -390,6 +398,133 @@ undershow.tick = (context) => {
 		context.fillStyle = Colour.Black
 		context.fillRect(0, 0, canvas.width, canvas.height)
 	}
+
+	for (const box of global.layout) {
+		if (box.direction > 0.0) {
+			if (box.opacity < 1.0) {
+				box.opacity += 0.04
+			} else {
+				box.direction = -1.0
+			}
+		} else {
+			if (box.opacity > 0.0) {
+				box.opacity -= 0.04
+			}
+		}
+	}
+	drawLayout(context, plate, global.layout)
+
+}
+
+const resetLayout = () => {
+	let opacity = 0.0
+	for (const box of global.layout) {
+		box.opacity = opacity
+		box.direction = 1.0
+		opacity -= 0.3
+	}
+}
+
+//=======//
+// BOXES //
+//=======//
+// https://www.wolframalpha.com/input?i=1320+%3D+4a+%2B+5b%3B+675.9+%3D+2a+%2B+3b%3B
+const SIZE = 309.6
+const MARGIN = 33.92
+const makeBox = ({colour, position = [MARGIN, MARGIN], dimensions = [SIZE, SIZE]} = {}) => {
+	return {colour, position, dimensions, opacity: 1.0, direction: 1.0}
+}
+
+const layouts = []
+
+layouts.push([
+	makeBox({colour: Colour.Green, position: [MARGIN, MARGIN]}),
+	makeBox({colour: Colour.Green, position: [MARGIN + SIZE+MARGIN, MARGIN]}),
+	makeBox({colour: Colour.Green, position: [MARGIN + 2*(SIZE+MARGIN), MARGIN]}),
+	makeBox({colour: Colour.Green, position: [MARGIN + 3*(SIZE+MARGIN), MARGIN]}),
+	makeBox({colour: Colour.Orange, position: [MARGIN, MARGIN+SIZE+MARGIN]}),
+	makeBox({colour: Colour.Orange, position: [MARGIN + 1*(SIZE+MARGIN), MARGIN+SIZE+MARGIN]}),
+	makeBox({colour: Colour.Orange, position: [MARGIN + 2*(SIZE+MARGIN), MARGIN+SIZE+MARGIN]}),
+	makeBox({colour: Colour.Orange, position: [MARGIN + 3*(SIZE+MARGIN), MARGIN+SIZE+MARGIN]}),
+])
+
+layouts.push([
+	makeBox({colour: Colour.Green, position: [MARGIN, MARGIN]}),
+	makeBox({colour: Colour.Green, position: [MARGIN + SIZE+MARGIN, MARGIN]}),
+	makeBox({colour: Colour.Green, position: [MARGIN + 2*(SIZE+MARGIN), MARGIN]}),
+	makeBox({colour: Colour.Green, position: [MARGIN + 3*(SIZE+MARGIN), MARGIN]}),
+	makeBox({colour: Colour.Orange, position: [MARGIN, MARGIN+SIZE+MARGIN], dimensions: [SIZE+MARGIN+SIZE/2, SIZE]}),
+	makeBox({colour: Colour.Orange, position: [SIZE+MARGIN+SIZE/2 + MARGIN + MARGIN + 0*(SIZE+MARGIN), MARGIN+SIZE+MARGIN], dimensions: [SIZE*0.795, SIZE]}),
+	makeBox({colour: Colour.Orange, position: [SIZE+MARGIN+SIZE/2 + MARGIN + MARGIN + 1*(SIZE*0.795+MARGIN), MARGIN+SIZE+MARGIN], dimensions: [SIZE*0.795, SIZE]}),
+	makeBox({colour: Colour.Orange, position: [SIZE+MARGIN+SIZE/2 + MARGIN + MARGIN + 2*(SIZE*0.795+MARGIN), MARGIN+SIZE+MARGIN], dimensions: [SIZE*0.795, SIZE]}),
+])
+
+layouts.push([
+	makeBox({colour: Colour.Green, position: [MARGIN, MARGIN]}),
+	makeBox({colour: Colour.Green, position: [MARGIN + SIZE+MARGIN, MARGIN]}),
+	makeBox({colour: Colour.Orange, position: [MARGIN + 2*(SIZE+MARGIN), MARGIN]}),
+	makeBox({colour: Colour.Green, position: [MARGIN + 3*(SIZE+MARGIN), MARGIN]}),
+	makeBox({colour: Colour.Orange, position: [MARGIN, MARGIN+SIZE+MARGIN], dimensions: [SIZE+MARGIN+SIZE/2, SIZE]}),
+	makeBox({colour: Colour.Orange, position: [SIZE+MARGIN+SIZE/2 + MARGIN + MARGIN + 0*(SIZE+MARGIN), MARGIN+SIZE+MARGIN], dimensions: [SIZE*0.795, SIZE]}),
+	makeBox({colour: Colour.Orange, position: [SIZE+MARGIN+SIZE/2 + MARGIN + MARGIN + 1*(SIZE*0.795+MARGIN), MARGIN+SIZE+MARGIN], dimensions: [SIZE*0.795, SIZE]}),
+	makeBox({colour: Colour.Orange, position: [SIZE+MARGIN+SIZE/2 + MARGIN + MARGIN + 2*(SIZE*0.795+MARGIN), MARGIN+SIZE+MARGIN], dimensions: [SIZE*0.795, SIZE]}),
+])
+
+layouts.push([
+	makeBox({colour: Colour.Green, position: [MARGIN, MARGIN]}),
+	makeBox({colour: Colour.Green, position: [MARGIN + SIZE+MARGIN, MARGIN]}),
+	makeBox({colour: Colour.Orange, position: [MARGIN + 2*(SIZE+MARGIN), MARGIN]}),
+	makeBox({colour: Colour.Green, position: [MARGIN + 3*(SIZE+MARGIN), MARGIN]}),
+	makeBox({colour: Colour.Orange, position: [MARGIN, MARGIN+SIZE+MARGIN], dimensions: [SIZE+MARGIN+SIZE/2, SIZE]}),
+	makeBox({colour: Colour.Orange, position: [SIZE+MARGIN+SIZE/2 + MARGIN + MARGIN + 0*(SIZE+MARGIN), MARGIN+SIZE+MARGIN], dimensions: [SIZE*0.795, SIZE]}),
+	makeBox({colour: Colour.Green, position: [SIZE+MARGIN+SIZE/2 + MARGIN + MARGIN + 1*(SIZE*0.795+MARGIN), MARGIN+SIZE+MARGIN], dimensions: [SIZE*0.795, SIZE]}),
+	makeBox({colour: Colour.Orange, position: [SIZE+MARGIN+SIZE/2 + MARGIN + MARGIN + 2*(SIZE*0.795+MARGIN), MARGIN+SIZE+MARGIN], dimensions: [SIZE*0.795, SIZE]}),
+])
+
+layouts.push([
+	makeBox({colour: Colour.Green, position: [MARGIN, MARGIN]}),
+	makeBox({colour: Colour.Green, position: [MARGIN + SIZE+MARGIN, MARGIN]}),
+	makeBox({colour: Colour.Orange, position: [MARGIN, MARGIN+SIZE+MARGIN]}),
+	makeBox({colour: Colour.Orange, position: [MARGIN + 1*(SIZE+MARGIN), MARGIN+SIZE+MARGIN]}),
+])
+
+layouts.push([
+	makeBox({colour: Colour.Green, position: [MARGIN, MARGIN]}),
+	makeBox({colour: Colour.Green, position: [MARGIN + SIZE+MARGIN, MARGIN]}),
+	makeBox({colour: Colour.Green, position: [MARGIN + 2*(SIZE+MARGIN), MARGIN]}),
+	makeBox({colour: Colour.Green, position: [MARGIN + 3*(SIZE+MARGIN), MARGIN]}),
+])
+
+layouts.push([
+	makeBox({colour: Colour.Green, position: [MARGIN, MARGIN]}),
+	makeBox({colour: Colour.Green, position: [MARGIN + SIZE+MARGIN, MARGIN]}),
+	makeBox({colour: Colour.Orange, position: [MARGIN, MARGIN+SIZE+MARGIN]}),
+	makeBox({colour: Colour.Orange, position: [MARGIN + 1*(SIZE+MARGIN), MARGIN+SIZE+MARGIN]}),
+])
+
+layouts.push([
+	makeBox({colour: Colour.Green, position: [MARGIN, MARGIN]}),
+	makeBox({colour: Colour.Green, position: [MARGIN + SIZE+MARGIN, MARGIN]}),
+	makeBox({colour: Colour.Orange, position: [MARGIN, MARGIN+SIZE+MARGIN], dimensions: [SIZE+SIZE+MARGIN, SIZE]}),
+])
+
+const [DEFAULT_LAYOUT] = layouts
+
+const drawLayout = (context, plate, layout) => {
+	for (const box of layout) {
+		drawBox(context, plate, box)
+	}
+}
+
+const drawBox = (context, plate, box) => {
+	const {position, dimensions} = box
+	const [x, y] = position
+	const [width, height] = dimensions
+	context.globalAlpha = box.opacity > 0.0? box.opacity : 0.0
+	context.strokeStyle = box.colour
+	context.lineWidth = 10
+	context.strokeRect(x + plate.x, y + plate.y, width, height)
+	context.globalAlpha = 1.0
 }
 
 //==============//
@@ -544,6 +679,7 @@ const global = {
 	painterContainer: show.layers.last.appendChild(document.createElementNS("http://www.w3.org/2000/svg", "g")),
 	greenScreenEnabled: false,
 	fullGreenScreenEnabled: false,
+	layout: DEFAULT_LAYOUT,
 }
 
 window.global = global
@@ -622,7 +758,7 @@ KEYDOWN["r"] = () => {
 	global.painter.isPainting = false
 }
 
-KEYDOWN["c"] = KEYDOWN["r"]
+KEYDOWN["c"] = KEYDOWN["x"]
 
 KEYDOWN["1"] = () => global.colour = Colour.White
 KEYDOWN["2"] = () => global.colour = Colour.Red
@@ -646,3 +782,21 @@ KEYDOWN["Tab"] = (e) => {
 
 KEYDOWN["g"] = () => global.greenScreenEnabled = !global.greenScreenEnabled
 KEYDOWN["f"] = () => global.fullGreenScreenEnabled = !global.fullGreenScreenEnabled
+
+KEYDOWN["d"] = () => {
+	let index = layouts.indexOf(global.layout) + 1
+	if (index >= layouts.length) {
+		index = 0
+	}
+	global.layout = layouts[index]
+}
+
+KEYDOWN["a"] = () => {
+	let index = layouts.indexOf(global.layout) - 1
+	if (index < 0) {
+		index = layouts.length - 1
+	}
+	global.layout = layouts[index]
+}
+
+KEYDOWN["w"] = () => resetLayout()
