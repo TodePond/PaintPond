@@ -365,7 +365,7 @@ const undershow = CanvasShow.make()
 //==============//
 // GREEN SCREEN //
 //==============//
-const GREEN_SCREEN_COLOUR = Colour.multiply(Colour.Green, {lightness: 0.5})
+const GREEN_SCREEN_COLOUR = Colour.multiply(Colour.Blue, {lightness: 0.25})
 const PLATE_DIMENSIONS = [4400, 2253]
 const PLATE_SCALED_DIMENSIONS = PLATE_DIMENSIONS.map(v => v * 0.3)
 
