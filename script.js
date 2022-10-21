@@ -431,7 +431,8 @@ const resetLayout = () => {
 	for (const box of global.layout) {
 		box.opacity = opacity
 		box.direction = 1.0
-		opacity -= 0.08
+		//opacity -= 0.08
+		opacity -= 0.15
 	}
 }
 
