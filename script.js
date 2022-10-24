@@ -341,7 +341,7 @@ const berdWitch = makePainter({
 		streamline: 0.5,
 		thinning: 0.5,
 		last: true,
-		size: 10,
+		//size: 10,
 	},
 })
 
@@ -374,8 +374,8 @@ const undershow = CanvasShow.make()
 // GREEN SCREEN //
 //==============//
 const GREEN_SCREEN_COLOUR = Colour.multiply(Colour.Blue, {lightness: 0.25})
-const PLATE_DIMENSIONS = [4400, 2253]
-//const PLATE_DIMENSIONS = [2200 + 33.92, 2253]
+//const PLATE_DIMENSIONS = [4400, 2253]
+const PLATE_DIMENSIONS = [2200 + 33.92, 2253]
 const PLATE_SCALED_DIMENSIONS = PLATE_DIMENSIONS.map(v => v * 0.32).d
 
 undershow.tick = (context) => {
