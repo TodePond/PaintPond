@@ -483,6 +483,8 @@ const makeBox = ({colour, position = [MARGIN, MARGIN], dimensions = [SIZE, SIZE]
 
 const layouts = []
 
+layouts.push([])
+
 layouts.push([
 	makeBox({colour: Colour.Green, position: [MARGIN, MARGIN]}),
 	makeBox({colour: Colour.Green, position: [MARGIN + SIZE+MARGIN, MARGIN]}),
