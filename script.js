@@ -39,6 +39,7 @@ const makePainter = ({
 	wobble = 1.0,
 	idleFrequency = { x: 500, y: 750 },
 	strokeOptions = {},
+	lockAxis = false,
 } = {}) => {
 
 	const images = sources.map(() => {
@@ -105,6 +106,7 @@ const makePainter = ({
 		idleFrequency,
 		strokeOptions,
 		ready,
+		lockAxis,
 	}
 
 	return painter
@@ -117,7 +119,7 @@ const drawPainter = (painter) => {
 	const height = image.height.baseVal.value
 	const cx = painter.x + width * painter.centerX
 	const cy = painter.y + height * painter.centerY
-
+	
 	image.setAttribute("x", cx - width/2)
 	image.setAttribute("y", cy - height/2)
 	image.setAttribute("transform", `rotate(${r * 180 / Math.PI}, ${cx}, ${cy})`)
@@ -129,9 +131,11 @@ const getBrushPosition = (painter) => {
 	const height = image.height.baseVal.value
 	const x = painter.x - painter.offsetX * painter.scale
 	const y = painter.y - painter.offsetY * painter.scale
-	const cx = painter.x + width*painter.centerX
-	const cy = painter.y + height*painter.centerY
-	return rotatePoint(cx, cy, x, y, painter.r)
+	let cx = painter.x + width*painter.centerX
+	let cy = painter.y + height*painter.centerY
+	
+	const point = rotatePoint(cx, cy, x, y, painter.r)
+	return point
 }
 
 let lastBrushWasTouch = false
@@ -139,6 +143,7 @@ let restingPosition = [0, 0]
 on.mousemove(() => restingPosition = Mouse.position.map(v => v * 1 / (window.shrinkScore)))
 on.touchstart(e => e.preventDefault(), {passive: false})
 
+let previousPosition = [0, 0]
 const updatePainter = (layers, strokeHistoryContainer, currentStrokeContainer, painter, paths, colour) => {
 	if (painter.isPainting) {
 		painter.idleFadePower -= 0.01
@@ -223,9 +228,11 @@ const updatePainter = (layers, strokeHistoryContainer, currentStrokeContainer, p
 		painter[speed] = (mouse[position] - painter[position]) * painter.speed
 		painter[position] += painter[speed]
 	}
-	
+
 	global.painter.x += (2*Math.sin(performance.now() / global.painter.idleFrequency.x)) * global.painter.idleFadePower * global.painter.wobble
 	global.painter.y += (2*Math.sin(performance.now() / global.painter.idleFrequency.y)) * global.painter.idleFadePower * global.painter.wobble
+
+	previousPosition = [painter.x, painter.y]
 
 	painter.targetR = painter.dx * painter.dr + painter.dy * -painter.dr
 	painter.r += (painter.targetR - painter.r) * painter.speedR
@@ -328,6 +335,25 @@ const tode = makePainter({
 	strokeOptions: berd.strokeOptions,
 })
 
+const bot = makePainter({
+	sources: ["images/bot0.png", "images/bot1.png"],
+	scale: 0.5,
+	centerY: 0.11,
+	centerX: 1.125,
+	offsetX: -500,
+	strokeOptions: berd.strokeOptions,
+
+	
+	speed: 0.05,
+	minSpeed: 0.035,
+	maxSpeed: 0.2,
+	dr: 0.05,
+	speedR: 0.1,
+	wobble: 1.0,
+	acceleration: 0.0001,
+	lockAxis: true,
+})
+
 const berdWitch = makePainter({
 	sources: ["images/hat/berd0.png", "images/hat/berd1.png"],
 	scale: 0.5,
@@ -367,27 +393,6 @@ const todeWitch = makePainter({
 	strokeOptions: berdWitch.strokeOptions,
 })
 
-const bot = makePainter({
-	sources: ["images/bot0.png", "images/bot1.png"],
-	scale: 0.5,
-	centerY: 0.35,
-	centerX: 0.55,
-	offsetX: -47,
-	offsetY: -60,
-	speed: 0.1,
-	minSpeed: 0.035,
-	maxSpeed: 0.2,
-	dr: 0.05,
-	speedR: 0.1,
-	acceleration: 0.0002,
-	strokeOptions: {
-		smoothing: 1.0,
-		streamline: 0.5,
-		thinning: 0.5,
-		last: true,
-	},
-})
-
 const painters = [bot, berd, tode]
 
 //======//
@@ -404,6 +409,7 @@ const GREEN_SCREEN_COLOUR = Colour.multiply(Colour.Blue, {lightness: 0.25})
 const PLATE_DIMENSIONS = [2200 + 33.92, 2253]
 const PLATE_SCALED_DIMENSIONS = PLATE_DIMENSIONS.map(v => v * 0.32).d
 
+let debug = undefined
 undershow.tick = (context) => {
 	const {canvas} = context
 	const {width, height} = canvas
@@ -429,8 +435,7 @@ undershow.tick = (context) => {
 		}
 
 	} else {
-		context.fillStyle = Colour.Black
-		context.fillRect(0, 0, canvas.width, canvas.height)
+		context.clearRect(0, 0, canvas.width, canvas.height)
 	}
 
 	for (const box of global.layout) {
@@ -449,6 +454,12 @@ undershow.tick = (context) => {
 		}
 	}
 	drawLayout(context, plate, global.layout)
+
+	if (debug !== undefined) {
+		undershow.context.globalAlpha = 1.0
+		undershow.context.fillStyle = "red"
+		undershow.context.fillRect(debug.x, debug.y, 10, 10)
+	}
 
 }
 
@@ -648,7 +659,7 @@ const pictureMode = (() => {
 					}
 					if (isDragging) {
 						const [x0, y0] = dragStart
-						const [x1, y1] = [e.clientX, e.clientY]
+						let [x1, y1] = [e.clientX, e.clientY]
 						const minX = Math.min(x0, x1)
 						const minY = Math.min(y0, y1)
 						const maxX = Math.max(x0, x1)
