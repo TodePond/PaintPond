@@ -304,6 +304,7 @@ const berd = makePainter({
 		streamline: 0.5,
 		thinning: 0.5,
 		last: true,
+		//size: 10,
 	},
 })
 
@@ -314,12 +315,16 @@ const tode = makePainter({
 	centerX: 0.55,
 	offsetX: -35,
 	offsetY: -17.5,
+	
+	
 	speed: 0.09,
 	minSpeed: 0.01,
 	maxSpeed: 0.15,
 	dr: 0.05,
 	speedR: 0.05,
 	acceleration: 0.00001,
+	wobble: 0.5,
+
 	strokeOptions: berd.strokeOptions,
 })
 
@@ -362,7 +367,28 @@ const todeWitch = makePainter({
 	strokeOptions: berdWitch.strokeOptions,
 })
 
-const painters = [berdWitch, todeWitch]
+const bot = makePainter({
+	sources: ["images/bot0.png", "images/bot1.png"],
+	scale: 0.5,
+	centerY: 0.35,
+	centerX: 0.55,
+	offsetX: -47,
+	offsetY: -60,
+	speed: 0.1,
+	minSpeed: 0.035,
+	maxSpeed: 0.2,
+	dr: 0.05,
+	speedR: 0.1,
+	acceleration: 0.0002,
+	strokeOptions: {
+		smoothing: 1.0,
+		streamline: 0.5,
+		thinning: 0.5,
+		last: true,
+	},
+})
+
+const painters = [bot, berd, tode]
 
 //======//
 // SHOW //
