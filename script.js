@@ -256,7 +256,7 @@ const updatePainter = (layers, strokeHistoryContainer, currentStrokeContainer, p
 		const displacementSecondLast = [newBrush.x - secondLast[0], newBrush.y - secondLast[1]]
 		//const distanceLast = Math.hypot(...displacementLast)
 		const distanceSecondLast = Math.hypot(...displacementSecondLast)
-		if (distanceSecondLast <= 5.0) {
+		if (distanceSecondLast <= 5.0 || painter.lockAxis) {
 			path[path.length-1] = [newBrush.x, newBrush.y]
 			const stroke = getStroke(path, painter.strokeOptions)
 			path.element.setAttribute("d", getSvgPathFromStroke(stroke))
