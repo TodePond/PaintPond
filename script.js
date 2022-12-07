@@ -393,7 +393,7 @@ const todeWitch = makePainter({
 	strokeOptions: berdWitch.strokeOptions,
 })
 
-const painters = [bot, berd, tode]
+const painters = [berd, tode, bot]
 
 //======//
 // SHOW //
