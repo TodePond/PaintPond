@@ -404,6 +404,7 @@ const undershow = CanvasShow.make()
 //==============//
 // GREEN SCREEN //
 //==============//
+//const GREEN_SCREEN_COLOUR = Colour.Void
 const GREEN_SCREEN_COLOUR = Colour.multiply(Colour.Blue, {lightness: 0.25})
 //const PLATE_DIMENSIONS = [4400, 2253]
 //const PLATE_DIMENSIONS = [2200 + 33.92, 2253]
@@ -433,6 +434,12 @@ undershow.tick = (context) => {
 			context.fillStyle = Colour.Black
 			context.fillRect(mx/2, my/2, ...PLATE_SCALED_DIMENSIONS)
 		}
+
+		const path = new Path2D()
+		path.rect(mx/2, my/2, ...PLATE_SCALED_DIMENSIONS)
+		context.strokeStyle = Colour.White
+		context.lineWidth = 10
+		context.stroke(path)
 
 	} else {
 		context.clearRect(0, 0, canvas.width, canvas.height)
