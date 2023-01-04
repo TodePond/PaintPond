@@ -732,8 +732,8 @@ const pictureMode = (() => {
 // GLOBAL STATE //
 //==============//
 const global = {
-	painterId: 0,
-	painter: painters[0],
+	painterId: 2,
+	painter: painters[2],
 	paths: [],
 	colour: Colour.White,
 	currentFrame: null,
@@ -789,7 +789,7 @@ const changePainter = (painter) => {
 }
 
 // Run it once at the start to trigger the initial painter
-changePainter(painters[0])
+changePainter(painters[2])
 
 //=======//
 // EVENT //
