@@ -3,7 +3,7 @@
 # PaintPond
 Paint with a painter.<br>
 I originally made PaintPond for this video: ✨ **[NEW Cellular Automata](https://youtu.be/WMJ1H3Ai-qs)**<br>
-It's also going to be used in my next one: 🔮 **Spellular Automata**
+It was also used in this one: 🔮 **[Spellular Automata](https://youtu.be/xvlsJ3FqNYU?si=8PFznQkaGfdiOPJA)**
 
 Try it at [paintpond.cool](https://paintpond.cool)!
 
