@@ -732,15 +732,15 @@ const pictureMode = (() => {
 // GLOBAL STATE //
 //==============//
 const global = {
-	painterId: 2,
-	painter: painters[2],
+	painterId: 0,
+	painter: painters[0],
 	paths: [],
 	colour: Colour.White,
 	currentFrame: null,
 	strokeHistoryContainer: show.layers.first.appendChild(document.createElementNS("http://www.w3.org/2000/svg", "g")),
 	currentStrokeContainer: show.layers.last.appendChild(document.createElementNS("http://www.w3.org/2000/svg", "g")),
 	painterContainer: show.layers.last.appendChild(document.createElementNS("http://www.w3.org/2000/svg", "g")),
-	greenScreenEnabled: true,
+	greenScreenEnabled: false,
 	fullGreenScreenEnabled: false,
 	layout: DEFAULT_LAYOUT,
 }
@@ -789,7 +789,7 @@ const changePainter = (painter) => {
 }
 
 // Run it once at the start to trigger the initial painter
-changePainter(painters[2])
+changePainter(painters[0])
 
 //=======//
 // EVENT //
