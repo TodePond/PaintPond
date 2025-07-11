@@ -12,8 +12,8 @@ Try it at [paintpond.cool](https://paintpond.cool)!
 **Tab key**: Change painter!<br>
 **Space bar**: Enter [screenshot mode](docs/screenshot-mode.md)!
 
-**X key**: Undo!<br>
-**C key**: Clear the screen!<br>
+**X or C key**: Undo!<br>
+**R key**: Clear the screen!<br>
 
 ## Running Locally
 To run locally...<br>
