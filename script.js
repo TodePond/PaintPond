@@ -803,7 +803,7 @@ on.keydown(e => {
 	func(e)
 })
 
-KEYDOWN["x"] = () => {
+const undo = () => {
 	const path = global.paths.pop()
 	if (path) {
 		path.element.remove()
@@ -813,6 +813,14 @@ KEYDOWN["x"] = () => {
 	}
 }
 
+KEYDOWN["x"] = undo
+KEYDOWN["c"] = undo
+
+KEYDOWN["z"] = (e) => {
+	if (!e.ctrlKey) return
+	undo()
+}
+
 KEYDOWN["r"] = () => {
 	global.paths.forEach((path) => {
 		path.element.remove()
@@ -820,8 +828,6 @@ KEYDOWN["r"] = () => {
 	global.paths = []
 	global.painter.isPainting = false
 }
-
-KEYDOWN["c"] = KEYDOWN["x"]
 
 KEYDOWN["1"] = () => global.colour = Colour.White
 KEYDOWN["2"] = () => global.colour = Colour.Red

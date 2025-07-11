@@ -12,7 +12,7 @@ Try it at [paintpond.cool](https://paintpond.cool)!
 **Tab key**: Change painter!<br>
 **Space bar**: Enter [screenshot mode](docs/screenshot-mode.md)!
 
-**X or C key**: Undo!<br>
+**Ctrl+Z, X, or C**: Undo!<br>
 **R key**: Clear the screen!<br>
 
 ## Running Locally
