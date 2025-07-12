@@ -208,7 +208,11 @@ const updatePainter = (layers, strokeHistoryContainer, currentStrokeContainer, p
 				const path = []
 				const element = document.createElementNS("http://www.w3.org/2000/svg", "path")
 				path.element = element
+				if (global.curPathIndex < paths.length) {
+					paths.length = global.curPathIndex + 1
+				}
 				paths.push(path)
+				global.curPathIndex += 1
 				path.colour = colour
 				path.push([brush.x, brush.y])
 				const stroke = getStroke(path, painter.strokeOptions)
@@ -243,9 +247,9 @@ const updatePainter = (layers, strokeHistoryContainer, currentStrokeContainer, p
 	painter.brushdy = newBrush.y - brush.y
 	
 	if (painter.isPainting) {
-		const path = paths.last
+		const path = paths[global.curPathIndex]
 		const last = path.last
-		const secondLast = path[path.length - 2]
+		const secondLast = path[global.curPathIndex - 1]
 		if (secondLast === undefined || last === undefined) {			
 			path.push([newBrush.x, newBrush.y])
 			const stroke = getStroke(path, painter.strokeOptions)
@@ -735,6 +739,7 @@ const global = {
 	painterId: 0,
 	painter: painters[0],
 	paths: [],
+	curPathIndex: -1,
 	colour: Colour.White,
 	currentFrame: null,
 	strokeHistoryContainer: show.layers.first.appendChild(document.createElementNS("http://www.w3.org/2000/svg", "g")),
@@ -804,12 +809,28 @@ on.keydown(e => {
 })
 
 const undo = () => {
-	const path = global.paths.pop()
-	if (path) {
-		path.element.remove()
+	if (global.curPathIndex > -1) {
+		const path = global.paths[global.curPathIndex]
+		if (path) {
+			path.element.style['visibility'] = 'hidden'
+			global.curPathIndex -= 1
+		}
+		if (global.painter.isPainting) {
+			global.painter.isPainting = false
+		}
 	}
-	if (global.painter.isPainting) {
-		global.painter.isPainting = false
+}
+
+const redo = () => {
+	if (global.curPathIndex < global.paths.length - 1) {
+		const path = global.paths[global.curPathIndex + 1]
+		if (path) {
+			path.element.style['visibility'] = 'visible'
+			global.curPathIndex += 1
+		}
+		if (global.painter.isPainting) {
+			global.painter.isPainting = false
+		}
 	}
 }
 
@@ -821,11 +842,19 @@ KEYDOWN["z"] = (e) => {
 	undo()
 }
 
+KEYDOWN["Z"] = (e) => {
+	if (!e.ctrlKey) return
+	redo()
+}
+
+KEYDOWN["y"] = KEYDOWN["Z"]
+
 KEYDOWN["r"] = () => {
 	global.paths.forEach((path) => {
 		path.element.remove()
 	})
 	global.paths = []
+	global.curPathIndex = -1
 	global.painter.isPainting = false
 }
 
