@@ -12,7 +12,8 @@ Try it at [paintpond.cool](https://paintpond.cool)!
 **Tab key**: Change painter!<br>
 **Space bar**: Enter [screenshot mode](docs/screenshot-mode.md)!
 
-**X or C key**: Undo!<br>
+**Ctrl+Z, X, or C**: Undo!<br>
+**Ctrl+Shift+Z or Ctrl+Y**: Redo!<br>
 **R key**: Clear the screen!<br>
 
 ## Running Locally
@@ -23,7 +24,7 @@ you need to run a local server because it uses javascript modules.<br>
 I recommend getting [deno](https://deno.land)
 and then installing `file_server` with this command:
 ```
-deno install --allow-read --allow-net https://deno.land/std@0.142.0/http/file_server.ts
+deno install --global --allow-read --allow-net https://deno.land/std@0.142.0/http/file_server.ts
 ```
 Then you can run this command to run a local server:
 ```
